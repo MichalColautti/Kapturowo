@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:23-alpine-slim
 WORKDIR /app
 RUN npm install -g serve
 COPY . .
