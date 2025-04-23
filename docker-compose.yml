@@ -1,4 +1,3 @@
-# docker-compose.yml
 version: "3.8"
 
 services:
@@ -11,13 +10,45 @@ services:
     depends_on:
       - frontend
       - backend
+    networks:
+      - app-network
 
   frontend:
     build: ./frontend
     expose:
       - "3000"
+    networks:
+      - app-network
 
   backend:
     build: ./backend
     expose:
       - "5000"
+    environment:
+      DB_HOST: mysql
+      DB_USER: sklep_user
+      DB_PASSWORD: sklephaslo
+      DB_NAME: sklep_db
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: kapturowo_db
+      MYSQL_USER: kapturowouser
+      MYSQL_PASSWORD: kapturowopassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge
