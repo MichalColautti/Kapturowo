@@ -14,9 +14,16 @@ services:
       - app-network
 
   frontend:
-    build: ./frontend
-    expose:
-      - "3000"
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile # Użyj tego Dockerfile dla dev
+    ports:
+      - "3000:5173" # Mapuj port hosta 3000 na port kontenera 5173 (Vite)
+    volumes:
+      - ./frontend:/app # Zamontuj cały folder frontend
+      - /app/node_modules # Wyklucz wolumen dla node_modules
+    environment:
+      CHOKIDAR_USEPOLLING: "true" # Czasami potrzebne w Dockerze do śledzenia zmian
     networks:
       - app-network
 

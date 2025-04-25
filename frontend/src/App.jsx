@@ -10,13 +10,13 @@ function App() {
         <nav>
           <ul>
             <li>
-              <Link to="/">Home</Link>
+              <Link to="/">Homeffff</Link>
             </li>
             <li>
-              <Link to="/about">About</Link>
+              <Link to="/about">Aboutfffff</Link>
             </li>
             <li>
-              <Link to="/contact">Contact</Link>
+              <Link to="/contact">Contajklkkhuct</Link>
             </li>
           </ul>
         </nav>
