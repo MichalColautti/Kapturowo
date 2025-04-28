@@ -1,37 +1,40 @@
 import React from "react";
-
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 function Header() {
   return (
     <header className="bg-light border-bottom sticky-top">
       <div className="container d-flex justify-content-between align-items-center p-2">
         <div className="d-flex align-items-center">
-          <img
-            src="/logo.png" // Zastąp ścieżką do Twojego logo
-            alt="Kapturowo Logo"
-            height="30" // Dostosuj rozmiar logo za pomocą atrybutu height
-            className="d-inline-block align-top me-2"
-          />
-          <span className="fw-bold fs-5">Kapturowo</span>
+          <Link to="/">
+            <img
+              src="\header-logo.png"
+              alt="Kapturowo Logo"
+              height="55"
+              className="d-inline-block align-top me-2"
+              style={{ cursor: "pointer" }}
+            />
+          </Link>
         </div>
         <nav className="ms-auto d-none d-lg-block">
           <ul className="nav">
             <li className="nav-item me-3">
-              <a className="nav-link text-dark" href="#">
+              <Link to="/category" className="nav-link">
                 Kategorie
-              </a>
+              </Link>
             </li>
             <li className="nav-item me-3">
-              <a className="nav-link text-dark" href="#">
+              <Link to="/new-products" className="nav-link">
                 Nowości
-              </a>
+              </Link>
             </li>
             <li className="nav-item me-3">
-              <a className="nav-link text-dark" href="#">
+              <Link to="/sale" className="nav-link">
                 Wyprzedaż
-              </a>
+              </Link>
             </li>
           </ul>
         </nav>
+        {/*Kod do wyszukiwarki*/}
         <div className="d-flex align-items-center">
           <div className="d-flex align-items-center me-3">
             <input
@@ -55,8 +58,9 @@ function Header() {
               </svg>
             </button>
           </div>
+          {/* Kod do icon */}
           <div className="d-flex align-items-center">
-            <button className="btn btn-link p-2">
+            <Link to="/user-profile" className="btn btn-link p-2">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -69,8 +73,8 @@ function Header() {
                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                 <circle cx="12" cy="7" r="4" />
               </svg>
-            </button>
-            <button className="btn btn-link p-2">
+            </Link>
+            <Link to="/favorites" className="btn btn-link p-2">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -82,7 +86,7 @@ function Header() {
               >
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.83l-1.06-1.22a5.5 5.5 0 0 0-7.78 7.78L12 19l9.84-9.84a5.5 5.5 0 0 0 0-7.78z" />
               </svg>
-            </button>
+            </Link>
             <button className="btn btn-link p-2">
               <svg
                 viewBox="0 0 24 24"
@@ -99,38 +103,6 @@ function Header() {
               </svg>
             </button>
           </div>
-          {/* Przycisk menu dla mniejszych ekranów */}
-          <button
-            className="navbar-toggler d-lg-none"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-            aria-controls="navbarNav"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon"></span>
-          </button>
-        </div>
-        {/* Menu nawigacyjne dla mniejszych ekranów */}
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav">
-            <li className="nav-item me-3">
-              <a className="nav-link text-dark" href="#">
-                Kategorie
-              </a>
-            </li>
-            <li className="nav-item me-3">
-              <a className="nav-link text-dark" href="#">
-                Nowości
-              </a>
-            </li>
-            <li className="nav-item me-3">
-              <a className="nav-link text-dark" href="#">
-                Wyprzedaż
-              </a>
-            </li>
-          </ul>
         </div>
       </div>
     </header>
