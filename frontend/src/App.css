@@ -86,3 +86,7 @@ Jak normalego cssa to pomyśl dziesieć razy zanim to zrobisz
 footer a {
   text-decoration: none;
 }
+
+main {
+  width: 100%;
+}
