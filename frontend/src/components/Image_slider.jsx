@@ -15,7 +15,6 @@ function Image_slider() {
         className="relative w-full overflow-hidden"
         style={{ aspectRatio: aspectRatio }} // Dodaj styl aspectRatio
       >
-        {/* Obrazy – będą przycinane, aby dopasować się do proporcji kontenera */}
         <div className="carousel-inner w-full h-full">
           <div className="carousel-item active w-full h-full absolute inset-0">
             <img
