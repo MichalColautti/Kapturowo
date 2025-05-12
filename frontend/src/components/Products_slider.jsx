@@ -137,7 +137,7 @@ function ProductSlider({ products, title }) {
       >
         {products.map((product) => (
           <div key={product.id} style={{ marginRight: "10px" }}>
-            <Product {...product} imageHeight="300px" imageAspectRatio="5/2" />
+            <Product {...product} imageAspectRatio="3/4" />
           </div>
         ))}
       </div>

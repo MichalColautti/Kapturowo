@@ -14,7 +14,7 @@ function Product({ name, price, imageUrl, imageHeight, imageAspectRatio }) {
   return (
     <div
       className="card"
-      style={{ width: "18rem", margin: "10px", position: "relative" }}
+      style={{ width: "18rem", margin: "5px", position: "relative" }}
     >
       <div
         className="card-img-container"

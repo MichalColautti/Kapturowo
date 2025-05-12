@@ -1,24 +1,15 @@
-/* Jeżeli używamy boostrapa użyj import (jeśli nie działa)
-Jak normalego cssa to pomyśl dziesieć razy zanim to zrobisz
-*/
-
 :root {
   --icon-color: #333333;
   --icon-hover-color: #747474;
 }
 
-.nav-link {
-  color: #333333 !important;
-  text-decoration: none;
-  position: relative;
-  transition: color 0.5s ease;
+.nav-link:hover::after,
+.dropdown-toggle:hover::after {
+  width: 100%;
 }
 
-.nav-link:hover {
-  color: #747474 !important;
-}
-
-.nav-link::after {
+.nav-link::after,
+.dropdown-toggle::after {
   content: "";
   position: absolute;
   bottom: -2px;
@@ -27,10 +18,25 @@ Jak normalego cssa to pomyśl dziesieć razy zanim to zrobisz
   height: 1px;
   background-color: #7a7a7a;
   transition: width 0.5s ease;
+  display: block;
 }
 
-.nav-link:hover::after {
-  width: 100%;
+.nav-item.dropdown > .nav-link.dropdown-toggle::after {
+  content: ""; /* Usuwa ikonę strzałki */
+  border: none; /* Usuwa obramowanie tworzące strzałkę */
+}
+
+.nav-link:hover,
+.dropdown-toggle:hover {
+  color: #747474 !important;
+}
+
+.nav-link,
+.dropdown-toggle {
+  color: #333 !important;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.5s ease;
 }
 
 .btn-link svg {
@@ -103,4 +109,61 @@ main {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.mega-menu {
+  display: none;
+  position: fixed;
+  top: 64px; /* przylega do headera */
+  left: 0;
+  width: 100vw;
+  background-color: #fff;
+  border-bottom: 1px solid #e5e5e5;
+  z-index: 999;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+}
+
+.mega-menu .d-flex {
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 0rem; /* Zmieniony odstęp */
+  justify-content: center;
+}
+
+/* Pokaż menu przy hoverze */
+.nav-item.dropdown:hover .mega-menu {
+  display: block;
+}
+
+/* Styl linków */
+.mega-menu ul li a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+  padding: 0.25rem 0;
+}
+
+.mega-menu ul li a:hover {
+  color: #d33;
+}
+
+.mega-menu.show .d-flex > div {
+  /* Dodajemy klasę .show do selektora .mega-menu */
+  width: auto !important; /* !important wymusi nadpisanie innych stylów */
+  margin-right: 1rem !important;
+}
+
+.mega-menu.show .d-flex > div:last-child {
+  margin-right: 0 !important;
+}
+
+.mega-menu.show .d-flex {
+  /* Dodajemy klasę .show do selektora .mega-menu */
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 6rem !important; /* Używamy !important, aby nadpisać potencjalny gap z Bootstrapa */
+  justify-content: center !important; /* Używamy !important, aby nadpisać potencjalne wyśrodkowanie z Bootstrapa */
+  display: flex !important; /* Upewniamy się, że jest flexboxem */
 }

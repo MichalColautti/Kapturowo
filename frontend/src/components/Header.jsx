@@ -1,8 +1,58 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+
 function Header() {
+  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+  const headerRef = useRef(null);
+  const megaMenuRef = useRef(null);
+  const dropdownRef = useRef(null); // Referencja do elementu <li> dropdown
+
+  const handleMouseEnter = () => {
+    setIsMegaMenuOpen(true);
+  };
+
+  const handleMouseLeaveHeader = (e) => {
+    // Sprawdzamy, czy kursor opuścił header i nie jest nad mega menu
+    if (
+      headerRef.current &&
+      !headerRef.current.contains(e.relatedTarget) &&
+      megaMenuRef.current &&
+      !megaMenuRef.current.contains(e.relatedTarget)
+    ) {
+      setIsMegaMenuOpen(false);
+    }
+  };
+
+  const handleMouseLeaveMegaMenu = (e) => {
+    // Sprawdzamy, czy kursor opuścił mega menu i nie wrócił do dropdown-toggle
+    if (
+      megaMenuRef.current &&
+      !megaMenuRef.current.contains(e.relatedTarget) &&
+      dropdownRef.current &&
+      !dropdownRef.current.contains(e.relatedTarget)
+    ) {
+      setIsMegaMenuOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (headerRef.current && megaMenuRef.current) {
+      if (isMegaMenuOpen) {
+        headerRef.current.classList.remove("border-bottom");
+        megaMenuRef.current.classList.add("border-bottom");
+      } else {
+        headerRef.current.classList.add("border-bottom");
+        megaMenuRef.current.classList.remove("border-bottom");
+      }
+    }
+  }, [isMegaMenuOpen]);
+
   return (
-    <header className="bg-light border-bottom sticky-top">
+    <header
+      className="bg-light sticky-top border-bottom"
+      ref={headerRef}
+      onMouseLeave={handleMouseLeaveHeader} // Nasłuchujemy opuszczenia headera
+    >
       <div className="container d-flex justify-content-between align-items-center p-2">
         <div className="d-flex align-items-center">
           <Link to="/">
@@ -15,12 +65,76 @@ function Header() {
             />
           </Link>
         </div>
-        <nav className="ms-auto d-none d-lg-block">
-          <ul className="nav">
-            <li className="nav-item me-3">
-              <Link to="/category" className="nav-link">
+        <nav className="ms-auto d-none d-lg-block ">
+          <ul className="nav position-relative">
+            <li
+              className="nav-item dropdown position-static"
+              onMouseEnter={handleMouseEnter}
+              ref={dropdownRef} // Przypisujemy referencję do li
+            >
+              <a
+                className="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                aria-expanded={isMegaMenuOpen}
+              >
                 Kategorie
-              </Link>
+              </a>
+              <div
+                className={`dropdown-menu m-0 shadow-none rounded-0 mega-menu position-fixed start-0 ${
+                  isMegaMenuOpen ? "show" : ""
+                }`}
+                ref={megaMenuRef}
+                onMouseLeave={handleMouseLeaveMegaMenu} // Nasłuchujemy opuszczenia mega menu
+              >
+                <div className="d-flex justify-content-between flex-wrap px-5 py-4">
+                  <div>
+                    <h6 className="fw-bold mb-3">Mężczyzna</h6>
+                    <ul className="list-unstyled">
+                      <li>
+                        <Link to="/mezczyzna/bluzy">Bluzy</Link>
+                      </li>
+                      <li>
+                        <Link to="/mezczyzna/t-shirty">T-shirty</Link>
+                      </li>
+                      <li>
+                        <Link to="/mezczyzna/buty">Buty</Link>
+                      </li>
+                      <li>
+                        <Link to="/mezczyzna/akcesoria">Akcesoria</Link>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h6 className="fw-bold mb-3">Kobieta</h6>
+                    <ul className="list-unstyled">
+                      <li>
+                        <Link to="/kobieta/bluzy">Bluzy</Link>
+                      </li>
+                      <li>
+                        <Link to="/kobieta/t-shirty">T-shirty</Link>
+                      </li>
+                      <li>
+                        <Link to="/kobieta/buty">Buty</Link>
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h6 className="fw-bold mb-3">Dziecko</h6>
+                    <ul className="list-unstyled">
+                      <li>
+                        <Link to="/dziecko/bluzy">Bluzy</Link>
+                      </li>
+                      <li>
+                        <Link to="/dziecko/t-shirty">T-shirty</Link>
+                      </li>
+                      <li>
+                        <Link to="/dziecko/buty">Buty</Link>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </li>
             <li className="nav-item me-3">
               <Link to="/new-products" className="nav-link">
