@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import ProfileMenu from "./ProfileMenu";
 
 function Header() {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
@@ -181,20 +182,7 @@ function Header() {
 
         {/* Kod do icon */}
         <div className="d-flex align-items-center">
-          <Link to="/user-profile" className="btn btn-link p-2">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ width: "1.2em", height: "1.2em" }}
-            >
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </Link>
+          <ProfileMenu />
           <Link to="/favorites" className="btn btn-link p-2">
             <svg
               viewBox="0 0 24 24"
