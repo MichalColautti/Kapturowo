@@ -110,6 +110,20 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+// Endpoint do pobierania po najnowszych produktach
+app.get('/api/products/latest', async (req, res) => {
+  try {
+    const [rows] = await db.promise().execute(
+      'SELECT * FROM products ORDER BY id DESC LIMIT 10'
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('Błąd pobierania najnowszych produktów:', err);
+    res.status(500).json({ error: 'Błąd serwera' });
+  }
+});
+
+
 // Endpoint do pobierania produktów według targetu
 app.get('/api/products/filter', async (req, res) => {
   const { category, audience } = req.query;
