@@ -13,6 +13,7 @@ import "./App.css";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Products from "./pages/Products";
 import { AuthProvider } from "./AuthContext";
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} /> 
+          <Route path="/products" element={<Products />} /> 
         </Routes>
       </AuthProvider>
       <Footer />

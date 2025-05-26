@@ -15,18 +15,19 @@ CREATE TABLE IF NOT EXISTS products (
   name VARCHAR(255) NOT NULL,
   price DECIMAL(10,2) NOT NULL,
   imageUrl VARCHAR(255),
+  target_audience ENUM('mezczyzna', 'kobieta', 'dziecko') NOT NULL,
   category_id INT,
   FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
 INSERT INTO categories (name) VALUES ('Bluzy'), ('T-shirty'), ('Buty'), ('Akcesoria');
 
-INSERT INTO products (name, price, imageUrl, category_id) VALUES
-('Bluza z kapturem', 120.00, '/image_slider/img_1.jpg', 1),
-('Bluza sportowa', 150.00, '/image_slider/img_1.jpg', 1),
-('T-shirt bawelniany', 80.00, '/image_slider/img_2.jpg', 2),
-('T-shirt z nadrukiem', 90.00, '/image_slider/img_3.jpg', 2),
-('Sneakersy', 300.00, '/image_slider/img_2.jpg', 3),
-('Buty trekkingowe', 450.00, '/image_slider/img_1.jpg', 3),
-('Czapka z daszkiem', 50.00, '/image_slider/img_3.jpg', 4),
-('Pasek skorzany', 75.00, '/image_slider/img_2.jpg', 4);
+INSERT INTO products (name, price, imageUrl, target_audience, category_id) VALUES
+('Bluza z kapturem', 120.00, '/image_slider/img_1.jpg', 'mezczyzna', 1),
+('Bluza sportowa', 150.00, '/image_slider/img_1.jpg', 'mezczyzna', 3),
+('T-shirt bawelniany', 80.00, '/image_slider/img_2.jpg', 'mezczyzna', 3),
+('T-shirt z nadrukiem', 90.00, '/image_slider/img_3.jpg', 'kobieta', 2),
+('Sneakersy', 300.00, '/image_slider/img_2.jpg', 'kobieta', 1),
+('Buty trekkingowe', 450.00, '/image_slider/img_1.jpg', 'kobieta', 3),
+('Czapka z daszkiem', 50.00, '/image_slider/img_3.jpg', 'dziecko', 2),
+('Pasek skorzany', 75.00, '/image_slider/img_2.jpg', 'dziecko', 3);

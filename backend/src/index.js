@@ -110,6 +110,39 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+// Endpoint do pobierania produktów według targetu
+app.get('/api/products/filter', async (req, res) => {
+  const { category, audience } = req.query;
+
+  let query = `
+    SELECT products.id, products.name, products.price, products.imageUrl,
+           products.target_audience, categories.name AS category
+    FROM products
+    LEFT JOIN categories ON products.category_id = categories.id
+    WHERE 1=1
+  `;
+  const params = [];
+
+  if (category) {
+    query += ' AND categories.name = ?';
+    params.push(category);
+  }
+
+  if (audience) {
+    query += ' AND products.target_audience = ?';
+    params.push(audience);
+  }
+
+  try {
+    const [rows] = await db.promise().execute(query, params);
+    res.json(rows);
+  } catch (err) {
+    console.error('Błąd przy filtrowaniu produktów:', err);
+    res.status(500).json({ message: 'Błąd serwera' });
+  }
+});
+
+
 app.listen(5000, '0.0.0.0', () => {
   console.log('Serwer backend działa na porcie 5000');
 });

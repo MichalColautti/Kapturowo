@@ -93,16 +93,13 @@ function Header() {
                     <h6 className="fw-bold mb-3">Mężczyzna</h6>
                     <ul className="list-unstyled">
                       <li>
-                        <Link to="/mezczyzna/bluzy">Bluzy</Link>
+                        <Link to="/products?category=bluzy&audience=mezczyzna">Bluzy</Link>
                       </li>
                       <li>
-                        <Link to="/mezczyzna/t-shirty">T-shirty</Link>
+                        <Link to="/products?category=T-shirty&audience=mezczyzna">T-shirty</Link>
                       </li>
                       <li>
-                        <Link to="/mezczyzna/buty">Buty</Link>
-                      </li>
-                      <li>
-                        <Link to="/mezczyzna/akcesoria">Akcesoria</Link>
+                        <Link to="/products?category=Buty&audience=mezczyzna">Buty</Link>
                       </li>
                     </ul>
                   </div>
@@ -110,13 +107,13 @@ function Header() {
                     <h6 className="fw-bold mb-3">Kobieta</h6>
                     <ul className="list-unstyled">
                       <li>
-                        <Link to="/kobieta/bluzy">Bluzy</Link>
+                        <Link to="/products?category=bluzy&audience=kobieta">Bluzy</Link>
                       </li>
                       <li>
-                        <Link to="/kobieta/t-shirty">T-shirty</Link>
+                        <Link to="/products?category=T-shirty&audience=kobieta">T-shirty</Link>
                       </li>
                       <li>
-                        <Link to="/kobieta/buty">Buty</Link>
+                        <Link to="/products?category=Buty&audience=kobieta">Buty</Link>
                       </li>
                     </ul>
                   </div>
@@ -124,13 +121,13 @@ function Header() {
                     <h6 className="fw-bold mb-3">Dziecko</h6>
                     <ul className="list-unstyled">
                       <li>
-                        <Link to="/dziecko/bluzy">Bluzy</Link>
+                        <Link to="/products?category=bluzy&audience=dziecko">Bluzy</Link>
                       </li>
                       <li>
-                        <Link to="/dziecko/t-shirty">T-shirty</Link>
+                        <Link to="/products?category=T-shirty&audience=dziecko">T-shirty</Link>
                       </li>
                       <li>
-                        <Link to="/dziecko/buty">Buty</Link>
+                        <Link to="/products?category=Buty&audience=dziecko">Buty</Link>
                       </li>
                     </ul>
                   </div>
