@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 import ProfileMenu from "./ProfileMenu";
 
 function Header() {
@@ -7,6 +7,8 @@ function Header() {
   const headerRef = useRef(null);
   const megaMenuRef = useRef(null);
   const dropdownRef = useRef(null); // Referencja do elementu <li> dropdown
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const handleMouseEnter = () => {
     setIsMegaMenuOpen(true);
@@ -33,6 +35,13 @@ function Header() {
       !dropdownRef.current.contains(e.relatedTarget)
     ) {
       setIsMegaMenuOpen(false);
+    }
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim() !== "") {
+      navigate(`/search?name=${encodeURIComponent(searchTerm)}`);
     }
   };
 
@@ -150,11 +159,13 @@ function Header() {
         <form
           className="d-flex align-items-center bg-light"
           role="search"
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={handleSearchSubmit}
         >
           <div className="search-wrapper w-100 bg-light position-relative">
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Szukaj..."
               className="form-control border-0 border-bottom ps-5 bg-light"
               style={{ borderRadius: 0, boxShadow: "none" }}
@@ -176,6 +187,7 @@ function Header() {
             </button>
           </div>
         </form>
+
 
         {/* Kod do icon */}
         <div className="d-flex align-items-center">

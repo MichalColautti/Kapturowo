@@ -14,6 +14,7 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Products from "./pages/Products";
+import SearchResults from "./pages/SearchResults";
 import { AuthProvider } from "./AuthContext";
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} /> 
           <Route path="/products" element={<Products />} /> 
+          <Route path="/search" element={<SearchResults />} /> 
         </Routes>
       </AuthProvider>
       <Footer />

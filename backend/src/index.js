@@ -156,6 +156,33 @@ app.get('/api/products/filter', async (req, res) => {
   }
 });
 
+// Pobieranie produktów po nazwie
+app.get('/api/products/search', async (req, res) => {
+  const { name } = req.query;
+
+  if (!name) {
+    return res.status(400).json({ message: 'Brak nazwy produktu w zapytaniu.' });
+  }
+
+  try {
+    const query = `
+      SELECT * FROM products
+      WHERE name LIKE ?
+      ORDER BY id DESC;
+    `;
+    const [rows] = await db.promise().execute(query, [`%${name}%`]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'Nie znaleziono produktów.' });
+    }
+
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error('Błąd przy wyszukiwaniu produktów:', err);
+    res.status(500).json({ message: 'Błąd serwera przy wyszukiwaniu produktów.' });
+  }
+});
+
 
 app.listen(5000, '0.0.0.0', () => {
   console.log('Serwer backend działa na porcie 5000');
