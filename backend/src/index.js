@@ -11,6 +11,10 @@ const bcrypt = require('bcrypt');
 app.use(cors());
 app.use(express.json());
 
+app.use('/product_images', express.static(path.join(__dirname, 'product_images')));
+app.use('/image_slider', express.static(path.join(__dirname, 'image_slider')));
+
+
 const db = mysql.createConnection({
   host: process.env.DB_HOST || 'mysql',
   user: process.env.DB_USER || 'admin',
@@ -88,6 +92,21 @@ app.post('/api/login', async (req, res) => {
   } catch (err) {
     console.error('Błąd przy logowaniu:', err);
     return res.status(500).json({ message: 'Błąd serwera' });
+  }
+});
+
+// Endpoint do pobierania produktów
+app.get('/api/products', async (req, res) => {
+  try {
+    const [rows] = await db.promise().execute(
+      `SELECT products.id, products.name, products.price, products.imageUrl, categories.name AS category
+       FROM products
+       LEFT JOIN categories ON products.category_id = categories.id`
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('Błąd przy pobieraniu produktów:', err);
+    res.status(500).json({ message: 'Błąd serwera' });
   }
 });
 
