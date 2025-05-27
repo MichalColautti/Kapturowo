@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import ProductSlider from "../components/Products_slider";
+import ProductGrid from "../components/Products_grid";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -32,7 +32,7 @@ function Produkty() {
     <div>
       <h1>Produkty: {category} - {audience}</h1>
       {products.length > 0 ? (
-        <ProductSlider products={products} title="Wyniki wyszukiwania" />
+        <ProductGrid products={products} title="Wyniki wyszukiwania" />
       ) : (
         <p>Brak produktów do wyświetlenia.</p>
       )}

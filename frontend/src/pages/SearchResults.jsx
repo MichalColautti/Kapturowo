@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import ProductSlider from "../components/Products_slider";
+import ProductGrid from "../components/Products_grid";
 
 function SearchResults() {
   const [searchParams] = useSearchParams();
@@ -29,7 +29,7 @@ function SearchResults() {
     <div className="container mt-5">
       <h3 className="mb-4">Wyniki dla: "{query}"</h3>
       {results.length > 0 ? (
-        <ProductSlider products={results} title="Wyniki wyszukiwania" />
+        <ProductGrid products={results} title="Wyniki wyszukiwania" />
       ) : (
         <p>Brak wyników.</p>
       )}
