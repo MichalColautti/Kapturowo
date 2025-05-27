@@ -1,17 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../AuthContext";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
-  const { user } = useAuth();
-  const userId = user?.id;
+  const userId = 1; 
 
-  useEffect(() => {
+  const fetchCart = () => {
     fetch(`/api/cart/${userId}`)
       .then(res => res.json())
       .then(data => setCartItems(data))
       .catch(err => console.error("Błąd pobierania koszyka:", err));
+  };
+
+  useEffect(() => {
+    fetchCart();
   }, []);
+
+  const removeFromCart = (productId) => {
+    fetch(`/api/cart`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, productId })
+    })
+      .then(() => {
+        fetchCart(); 
+      })
+      .catch(err => console.error("Błąd usuwania z koszyka:", err));
+  };
 
   const total = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -31,7 +45,15 @@ function Cart() {
                 <div>
                   <strong>{item.name}</strong> — {item.price} zł x {item.quantity}
                 </div>
-                <span>{(item.price * item.quantity).toFixed(2)} zł</span>
+                <div className="d-flex align-items-center">
+                  <span className="me-3">{(item.price * item.quantity).toFixed(2)} zł</span>
+                  <button
+                    className="btn btn-sm btn-danger"
+                    onClick={() => removeFromCart(item.product_id)}
+                  >
+                    Usuń
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

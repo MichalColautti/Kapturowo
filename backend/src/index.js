@@ -320,6 +320,22 @@ app.post('/api/cart', async (req, res) => {
   }
 });
 
+// Usuwanie produktu z koszyka
+app.delete('/api/cart', async (req, res) => {
+  const { userId, productId } = req.body;
+
+  try {
+    await db.promise().execute(
+      'DELETE FROM cart WHERE user_id = ? AND product_id = ?',
+      [userId, productId]
+    );
+    res.status(200).json({ message: "Produkt usunięty z koszyka" });
+  } catch (err) {
+    console.error("Błąd usuwania z koszyka:", err);
+    res.status(500).json({ message: "Błąd serwera" });
+  }
+});
+
 // Pobieranie produktów w koszyku użytkownika
 app.get('/api/cart/:userId', async (req, res) => {
   const { userId } = req.params;
