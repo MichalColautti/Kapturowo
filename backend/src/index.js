@@ -49,16 +49,21 @@ app.post('/api/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const query = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
-    db.query(query, [username, email, hashedPassword], (err) => {
+    db.query(query, [username, email, hashedPassword], (err, results) => {
       if (err) {
         console.error('Błąd przy zapisie:', err);
         return res.status(500).json({ message: 'Błąd serwera xd' });
       }
-      return res.status(201).json({ message: 'Użytkownik zarejestrowany', username: username });
+      // Zwracamy id nowo utworzonego użytkownika
+      return res.status(201).json({ 
+        message: 'Użytkownik zarejestrowany', 
+        id: results.insertId, 
+        username: username 
+      });
     });
   } catch (err) {
     console.error('Błąd przy rejestracji:', err);
-    return res.status(500).json({ message: 'Błąd hashowania hasła '});
+    return res.status(500).json({ message: 'Błąd hashowania hasła' });
   }
 });
 
@@ -87,8 +92,12 @@ app.post('/api/login', async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Nieprawidłowy login lub hasło' });
     }
-    res.setHeader('Content-Type', 'application/json');
-    return res.status(200).json({ message: 'Zalogowano pomyślnie', username: user.username });
+
+    return res.status(200).json({ 
+      message: 'Zalogowano pomyślnie', 
+      id: user.id, 
+      username: user.username 
+    });
   } catch (err) {
     console.error('Błąd przy logowaniu:', err);
     return res.status(500).json({ message: 'Błąd serwera' });
@@ -180,6 +189,67 @@ app.get('/api/products/search', async (req, res) => {
   } catch (err) {
     console.error('Błąd przy wyszukiwaniu produktów:', err);
     res.status(500).json({ message: 'Błąd serwera przy wyszukiwaniu produktów.' });
+  }
+});
+
+// Endpoint do dodawania produktów do ulubionych
+app.post('/api/favorites', async (req, res) => {
+  const { userId, productId } = req.body;
+  if (!userId || !productId) {
+    return res.status(400).json({ message: 'Brak danych' });
+  }
+
+  try {
+    await db.promise().execute(
+      'INSERT IGNORE INTO favorites (user_id, product_id) VALUES (?, ?)',
+      [userId, productId]
+    );
+    res.status(200).json({ message: 'Dodano do ulubionych' });
+  } catch (err) {
+    console.error('Błąd dodawania do ulubionych:', err);
+    res.status(500).json({ message: 'Błąd serwera' });
+  }
+});
+
+// Endpoint do usuwania ulubionych produktów
+app.delete('/api/favorites', async (req, res) => {
+  const { userId, productId } = req.body;
+  if (!userId || !productId) {
+    return res.status(400).json({ message: 'Brak danych' });
+  }
+
+  try {
+    await db.promise().execute(
+      'DELETE FROM favorites WHERE user_id = ? AND product_id = ?',
+      [userId, productId]
+    );
+    res.status(200).json({ message: 'Usunięto z ulubionych' });
+  } catch (err) {
+    console.error('Błąd usuwania z ulubionych:', err);
+    res.status(500).json({ message: 'Błąd serwera' });
+  }
+});
+
+// Endpoint do sprawdzania, czy produkt jest ulubiony
+app.get('/api/favorites/check', async (req, res) => {
+
+  const { userId, productId } = req.query;
+
+  if (!userId || !productId) {
+    return res.status(400).json({ message: 'Brak wymaganych parametrów' });
+  }
+
+  try {
+    const [rows] = await db.promise().execute(
+      'SELECT 1 FROM favorites WHERE user_id = ? AND product_id = ? LIMIT 1',
+      [userId, productId]
+    );
+
+    const isFavorite = rows.length > 0;
+
+    res.status(200).json({ isFavorite });  
+  } catch (err) {
+    res.status(500).json({ message: 'Błąd serwera' });
   }
 });
 

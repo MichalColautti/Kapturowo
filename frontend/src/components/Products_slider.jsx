@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Product from "./Product";
+import { useAuth } from "../AuthContext"; 
 
 function ProductSlider({ products, title }) {
   const containerRef = useRef(null);
@@ -7,6 +8,8 @@ function ProductSlider({ products, title }) {
   const [isHovering, setIsHovering] = useState(false);
   const productsPerPage = useRef(0);
   const lastInteractionRef = useRef(Date.now());
+  const { user } = useAuth();
+  const userId = user?.id;
 
   const updateProductsPerPage = useCallback(() => {
     if (containerRef.current && products.length > 0) {
@@ -137,7 +140,7 @@ function ProductSlider({ products, title }) {
       >
         {products.map((product) => (
           <div key={product.id} style={{ marginRight: "10px" }}>
-            <Product {...product} imageAspectRatio="3/4" />
+            <Product {...product} imageAspectRatio="3/4" userId={userId} />
           </div>
         ))}
       </div>

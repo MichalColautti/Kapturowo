@@ -43,7 +43,7 @@ function Register() {
       setMessage(data.message);
 
       if (response.ok) {
-        login(form.username);
+        login({ id: data.id, username: data.username });
         navigate("/");
       }
     } catch (error) {
@@ -57,54 +57,46 @@ function Register() {
       {message && <p className="mb-4 text-center text-red-500">{message}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="mb-2">
-          <input
-            type="text"
-            name="username"
-            value={form.username}
-            onChange={handleChange}
-            required
-            placeholder="username"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        <div className="mb-2">
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-            placeholder="email"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        <div className="mb-2">
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            required
-            placeholder="hasło"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        <div className="mb-2">
-          <input
-            type={showPassword ? "text" : "password"}
-            name="confirmPassword"
-            value={form.confirmPassword}
-            onChange={handleChange}
-            required
-            placeholder="powtórz hasło"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
+        <input
+          type="text"
+          name="username"
+          value={form.username}
+          onChange={handleChange}
+          required
+          placeholder="username"
+          className="w-full border border-gray-300 rounded px-3 py-2"
+        />
+        <br />
+        <input
+          type="email"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          required
+          placeholder="email"
+          className="w-full border border-gray-300 rounded px-3 py-2"
+        />
+        <br />
+        <input
+          type={showPassword ? "text" : "password"}
+          name="password"
+          value={form.password}
+          onChange={handleChange}
+          required
+          placeholder="hasło"
+          className="w-full border border-gray-300 rounded px-3 py-2"
+        />
+        <br />
+        <input
+          type={showPassword ? "text" : "password"}
+          name="confirmPassword"
+          value={form.confirmPassword}
+          onChange={handleChange}
+          required
+          placeholder="powtórz hasło"
+          className="w-full border border-gray-300 rounded px-3 py-2"
+        />
+        <br />
         <div className="flex items-center">
           <input
             id="showPassword"
@@ -117,11 +109,8 @@ function Register() {
             Pokaż hasło
           </label>
         </div>
-
-        <button
-          type="submit"
-          className="button"
-        >
+        <br />
+        <button type="submit" className="button">
           Zarejestruj się
         </button>
       </form>

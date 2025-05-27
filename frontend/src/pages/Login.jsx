@@ -27,7 +27,7 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        login(data.username); 
+        login({ id: data.id, username: data.username });
         setMessage("Zalogowano pomyślnie");
         navigate("/");
       } else {
@@ -53,8 +53,6 @@ function Login() {
           placeholder="email"
           className="w-full border border-gray-300 rounded px-3 py-2"
         />
-
-        <br />
 
         <input
           type={showPassword ? "text" : "password"}

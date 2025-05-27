@@ -1,10 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect  } from "react";
 
-function Product({ name, price, imageUrl, imageHeight, imageAspectRatio }) {
+function Product({ id: productId, name, price, imageUrl, imageHeight, imageAspectRatio, userId }) {
   const [isFavorite, setIsFavorite] = useState(false);
 
+  useEffect(() => {
+    if (!userId) return;
+
+    fetch(`/api/favorites/check?userId=${userId}&productId=${productId}`)
+      .then(res => {
+        return res.json();
+      })
+      .then(data => {
+        setIsFavorite(data.isFavorite);
+      })
+      .catch(err => console.error("Błąd pobierania ulubionych:", err));
+  }, [userId, productId]);
+
   const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+    console.log("Sprawdzanie ulubionych dla produktu:", productId, "użytkownika:", userId);
+    if (!userId) {
+      alert("Zaloguj się, aby dodawać do ulubionych.");
+      return;
+    }
+
+    const newFavoriteStatus = !isFavorite;
+    setIsFavorite(newFavoriteStatus);
+
+    fetch("/api/favorites", {
+      method: newFavoriteStatus ? "POST" : "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, productId }),
+    }).catch((error) => {
+      console.error("Błąd aktualizacji ulubionych:", error);
+      setIsFavorite(!newFavoriteStatus);
+    });
   };
 
   const aspectRatioStyle = imageAspectRatio
@@ -41,7 +70,7 @@ function Product({ name, price, imageUrl, imageHeight, imageAspectRatio }) {
           border: "none",
           cursor: "pointer",
           padding: 0,
-          zIndex: 2, // Zapewnij, że serce jest nad obrazkiem
+          zIndex: 2, 
         }}
         onClick={toggleFavorite}
       >
