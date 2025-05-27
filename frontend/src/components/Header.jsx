@@ -205,7 +205,7 @@ function Header() {
               <path d="M12 21 L3.5 12.5 A5.5 5.5 0 0 1 11.28 4.72 L12 6.2 L12.72 4.72 A5.5 5.5 0 0 1 20.5 12.5 L12 21 Z" />
             </svg>
           </Link>
-          <button className="btn btn-link p-2">
+          <Link to="/cart" className="btn btn-link p-2">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -219,7 +219,7 @@ function Header() {
               <line x1="3" y1="6" x2="21" y2="6" />
               <path d="M16 10a4 4 0 0 1-8 0" />
             </svg>
-          </button>
+          </Link>
         </div>
       </div>
     </header>

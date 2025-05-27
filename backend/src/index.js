@@ -255,8 +255,6 @@ app.get('/api/favorites/check', async (req, res) => {
 
 // Endpoint do pobierania ulubionych produktów użytkownika
 app.get('/api/get-favorites/:userId', async (req, res) => {
-  console.log('🌐 GET /api/favorites/ po userId');
-
   const { userId } = req.params;
 
   try {
@@ -270,6 +268,75 @@ app.get('/api/get-favorites/:userId', async (req, res) => {
   } catch (err) {
     console.error('Błąd pobierania ulubionych:', err);
     res.status(500).json({ message: 'Błąd serwera' });
+  }
+});
+
+// Endpoint do pobierania produktu po id
+app.get('/api/products/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [rows] = await db.promise().execute("SELECT * FROM products WHERE id = ?", [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Produkt nie znaleziony" });
+    }
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("Błąd pobierania produktu:", err);
+    res.status(500).json({ message: "Błąd serwera" });
+  }
+});
+
+// Dodawanie produktu do koszyka
+app.post('/api/cart', async (req, res) => {
+  const { userId, productId } = req.body;
+
+  if (!userId || !productId) {
+    return res.status(400).json({ message: 'Brak wymaganych danych.' });
+  }
+
+  try {
+    const [existing] = await db.promise().execute(
+      'SELECT * FROM cart WHERE user_id = ? AND product_id = ?',
+      [userId, productId]
+    );
+
+    if (existing.length > 0) {
+      await db.promise().execute(
+        'UPDATE cart SET quantity = quantity + 1 WHERE user_id = ? AND product_id = ?',
+        [userId, productId]
+      );
+    } else {
+      await db.promise().execute(
+        'INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, 1)',
+        [userId, productId]
+      );
+    }
+
+    res.status(200).json({ message: 'Dodano do koszyka.' });
+  } catch (err) {
+    console.error('Błąd dodawania do koszyka:', err);
+    res.status(500).json({ message: 'Błąd serwera' });
+  }
+});
+
+// Pobieranie produktów w koszyku użytkownika
+app.get('/api/cart/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const [items] = await db.promise().execute(
+      `SELECT p.id AS product_id, p.name, p.price, c.quantity
+       FROM cart c
+       JOIN products p ON c.product_id = p.id
+       WHERE c.user_id = ?`,
+      [userId]
+    );
+
+    res.json(items);
+  } catch (err) {
+    console.error("Błąd pobierania koszyka:", err);
+    res.status(500).json({ message: "Błąd serwera" });
   }
 });
 

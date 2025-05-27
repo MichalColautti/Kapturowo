@@ -15,6 +15,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Products from "./pages/Products";
 import SearchResults from "./pages/SearchResults";
+import ProductDetails from "./pages/ProductDetails"; 
+import Cart from "./pages/Cart"; 
 import { AuthProvider } from "./AuthContext";
 
 function App() {
@@ -35,6 +37,8 @@ function App() {
           <Route path="/register" element={<Register />} /> 
           <Route path="/products" element={<Products />} /> 
           <Route path="/search" element={<SearchResults />} /> 
+          <Route path="/product/:id" element={<ProductDetails />} /> 
+          <Route path="/cart" element={<Cart />} />
         </Routes>
       </AuthProvider>
       <Footer />
