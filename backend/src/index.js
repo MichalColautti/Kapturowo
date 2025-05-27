@@ -253,6 +253,26 @@ app.get('/api/favorites/check', async (req, res) => {
   }
 });
 
+// Endpoint do pobierania ulubionych produktów użytkownika
+app.get('/api/get-favorites/:userId', async (req, res) => {
+  console.log('🌐 GET /api/favorites/ po userId');
+
+  const { userId } = req.params;
+
+  try {
+    const [favorites] = await db.promise().execute(
+      `SELECT p.* FROM products p
+       JOIN favorites f ON p.id = f.product_id
+       WHERE f.user_id = ?`,
+      [userId]
+    );
+    res.json(favorites);
+  } catch (err) {
+    console.error('Błąd pobierania ulubionych:', err);
+    res.status(500).json({ message: 'Błąd serwera' });
+  }
+});
+
 
 app.listen(5000, '0.0.0.0', () => {
   console.log('Serwer backend działa na porcie 5000');
