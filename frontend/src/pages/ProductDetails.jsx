@@ -16,6 +16,14 @@ function ProductDetails() {
     M: 2,
     L: 3,
     XL: 4,
+    35: 5,
+    36: 6,
+    37: 7,
+    38: 8,
+    39: 9,
+    40: 10,
+    41: 11,
+    42: 12,
   };
 
 
@@ -90,7 +98,7 @@ function ProductDetails() {
           value={selectedSize}
           onChange={e => setSelectedSize(e.target.value)}
         >
-          {Object.keys(sizeMap).map((size) => (
+          {sizes.map(({ size }) => (
             <option key={size} value={size}>
               {size}
             </option>

@@ -14,12 +14,17 @@ app.use(express.json());
 app.use('/product_images', express.static(path.join(__dirname, 'product_images')));
 app.use('/image_slider', express.static(path.join(__dirname, 'image_slider')));
 
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
 
 const db = mysql.createConnection({
   host: process.env.DB_HOST || 'mysql',
   user: process.env.DB_USER || 'admin',
   password: process.env.DB_PASSWORD || 'password',
   database: process.env.DB_NAME || 'kapturowo_db',
+  charset: 'utf8mb4',
 });
 
 // Endpoint do rejestracji
@@ -123,7 +128,7 @@ app.get('/api/products', async (req, res) => {
 app.get('/api/products/latest', async (req, res) => {
   try {
     const [rows] = await db.promise().execute(
-      'SELECT * FROM products ORDER BY id DESC LIMIT 10'
+      'SELECT * FROM products ORDER BY id DESC LIMIT 8'
     );
     res.json(rows);
   } catch (err) {
