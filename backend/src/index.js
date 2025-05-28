@@ -287,64 +287,62 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
-// Dodawanie produktu do koszyka
-app.post('/api/cart', async (req, res) => {
-  const { userId, productId } = req.body;
-
-  if (!userId || !productId) {
-    return res.status(400).json({ message: 'Brak wymaganych danych.' });
-  }
-
+// Endpoint do dodawania produktu do koszyka
+app.post("/api/cart", async (req, res) => {
+  const { userId, productId, sizeId, quantity } = req.body;
+  console.log('recived add to cart req:',req.body);
   try {
     const [existing] = await db.promise().execute(
-      'SELECT * FROM cart WHERE user_id = ? AND product_id = ?',
-      [userId, productId]
+      "SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND size_id = ?",
+      [userId, productId, sizeId]
     );
 
     if (existing.length > 0) {
+      const newQty = existing[0].quantity + quantity;
       await db.promise().execute(
-        'UPDATE cart SET quantity = quantity + 1 WHERE user_id = ? AND product_id = ?',
-        [userId, productId]
+        "UPDATE cart SET quantity = ? WHERE id = ?",
+        [newQty, existing[0].id]
       );
     } else {
       await db.promise().execute(
-        'INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, 1)',
-        [userId, productId]
+        "INSERT INTO cart (user_id, product_id, size_id, quantity) VALUES (?, ?, ?, ?)",
+        [userId, productId, sizeId, quantity]
       );
     }
 
-    res.status(200).json({ message: 'Dodano do koszyka.' });
+    res.status(200).json({ message: "Dodano do koszyka" });
   } catch (err) {
-    console.error('Błąd dodawania do koszyka:', err);
-    res.status(500).json({ message: 'Błąd serwera' });
+    console.error("Błąd dodawania do koszyka:", err);
+    res.status(500).json({ error: "Wewnętrzny błąd serwera" });
   }
 });
 
 // Usuwanie produktu z koszyka
-app.delete('/api/cart', async (req, res) => {
-  const { userId, productId } = req.body;
+app.delete("/api/cart", async (req, res) => {
+  const { userId, productId, sizeId } = req.body;
 
   try {
     await db.promise().execute(
-      'DELETE FROM cart WHERE user_id = ? AND product_id = ?',
-      [userId, productId]
+      "DELETE FROM cart WHERE user_id = ? AND product_id = ? AND size_id = ?",
+      [userId, productId, sizeId]
     );
-    res.status(200).json({ message: "Produkt usunięty z koszyka" });
+    res.status(200).json({ message: "Usunięto z koszyka" });
   } catch (err) {
     console.error("Błąd usuwania z koszyka:", err);
-    res.status(500).json({ message: "Błąd serwera" });
+    res.status(500).json({ error: "Wewnętrzny błąd serwera" });
   }
 });
 
 // Pobieranie produktów w koszyku użytkownika
-app.get('/api/cart/:userId', async (req, res) => {
+app.get("/api/cart/:userId", async (req, res) => {
   const { userId } = req.params;
 
   try {
     const [items] = await db.promise().execute(
-      `SELECT p.id AS product_id, p.name, p.price, c.quantity
+      `SELECT c.product_id, c.size_id, c.quantity, p.name, p.price, s.size
        FROM cart c
        JOIN products p ON c.product_id = p.id
+       JOIN sizes s ON c.size_id = s.id
        WHERE c.user_id = ?`,
       [userId]
     );
@@ -352,7 +350,25 @@ app.get('/api/cart/:userId', async (req, res) => {
     res.json(items);
   } catch (err) {
     console.error("Błąd pobierania koszyka:", err);
-    res.status(500).json({ message: "Błąd serwera" });
+    res.status(500).json({ error: "Wewnętrzny błąd serwera" });
+  }
+});
+
+// Endpoint do pobierania rozmiarów produktów
+app.get("/api/products/:id/sizes", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.promise().execute(
+      `SELECT s.id, s.size
+       FROM sizes s
+       JOIN product_sizes ps ON s.id = ps.size_id
+       WHERE ps.product_id = ?`,
+      [id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error("Błąd pobierania rozmiarów:", err);
+    res.status(500).json({ error: "Wewnętrzny błąd serwera" });
   }
 });
 

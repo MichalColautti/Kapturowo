@@ -29,24 +29,52 @@ CREATE TABLE IF NOT EXISTS favorites (
   FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS sizes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  size VARCHAR(10) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS product_sizes (
+  product_id INT NOT NULL,
+  size_id INT NOT NULL,
+  PRIMARY KEY (product_id, size_id),
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+  FOREIGN KEY (size_id) REFERENCES sizes(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS cart (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   product_id INT NOT NULL,
+  size_id INT NOT NULL,
   quantity INT NOT NULL DEFAULT 1,
-  UNIQUE KEY unique_cart_item (user_id, product_id),
+  UNIQUE KEY unique_cart_item (user_id, product_id, size_id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+  FOREIGN KEY (size_id) REFERENCES sizes(id)
 );
 
 INSERT INTO categories (name) VALUES ('Bluzy'), ('T-shirty'), ('Buty'), ('Akcesoria');
 
+INSERT INTO sizes (size) VALUES ('S'), ('M'), ('L'), ('XL');
+
 INSERT INTO products (name, price, imageUrl, target_audience, category_id) VALUES
 ('Bluza z kapturem', 120.00, '/image_slider/img_1.jpg', 'mezczyzna', 1),
-('Bluza sportowa', 150.00, '/image_slider/img_1.jpg', 'mezczyzna', 3),
-('T-shirt bawelniany', 80.00, '/image_slider/img_2.jpg', 'mezczyzna', 3),
+('Bluza sportowa', 150.00, '/image_slider/img_1.jpg', 'mezczyzna', 1),
+('T-shirt bawelniany', 80.00, '/image_slider/img_2.jpg', 'mezczyzna', 2),
 ('T-shirt z nadrukiem', 90.00, '/image_slider/img_3.jpg', 'kobieta', 2),
-('Sneakersy', 300.00, '/image_slider/img_2.jpg', 'kobieta', 1),
+('Sneakersy', 300.00, '/image_slider/img_2.jpg', 'kobieta', 3),
 ('Buty trekkingowe', 450.00, '/image_slider/img_1.jpg', 'kobieta', 3),
-('Czapka z daszkiem', 50.00, '/image_slider/img_3.jpg', 'dziecko', 2),
-('Pasek skorzany', 75.00, '/image_slider/img_2.jpg', 'dziecko', 3);
+('T-shirt dla dziecka', 50.00, '/image_slider/img_3.jpg', 'dziecko', 2),
+('Buty dla dziecka', 75.00, '/image_slider/img_2.jpg', 'dziecko', 3);
+
+INSERT INTO product_sizes (product_id, size_id) VALUES
+(1, 2),(1, 3),(1, 4),
+(2, 2),(2, 3),(2, 4), 
+(3, 2),(3, 3),(3, 4), 
+(4, 2),(4, 3),(4, 4), 
+(5, 2),(5, 3),(5, 4), 
+(6, 2),(6, 3),(6, 1), 
+(7, 2),(7, 3),(7, 1),   
+(8, 2),(8, 3),(8, 1)
+; 

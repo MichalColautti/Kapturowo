@@ -15,14 +15,14 @@ function Cart() {
     fetchCart();
   }, []);
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = (productId, sizeId) => {
     fetch(`/api/cart`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, productId })
+      body: JSON.stringify({ userId, productId, sizeId })
     })
       .then(() => {
-        fetchCart(); 
+        fetchCart();
       })
       .catch(err => console.error("Błąd usuwania z koszyka:", err));
   };
@@ -41,15 +41,22 @@ function Cart() {
         <div>
           <ul className="list-group">
             {cartItems.map((item) => (
-              <li key={item.product_id} className="list-group-item d-flex justify-content-between align-items-center">
+              <li
+                key={`${item.product_id}-${item.size_id}`}
+                className="list-group-item d-flex justify-content-between align-items-center"
+              >
                 <div>
                   <strong>{item.name}</strong> — {item.price} zł x {item.quantity}
+                  <br />
+                  <small>Rozmiar: {item.size}</small>
                 </div>
                 <div className="d-flex align-items-center">
-                  <span className="me-3">{(item.price * item.quantity).toFixed(2)} zł</span>
+                  <span className="me-3">
+                    {(item.price * item.quantity).toFixed(2)} zł
+                  </span>
                   <button
                     className="btn btn-sm btn-danger"
-                    onClick={() => removeFromCart(item.product_id)}
+                    onClick={() => removeFromCart(item.product_id, item.size_id)}
                   >
                     Usuń
                   </button>
