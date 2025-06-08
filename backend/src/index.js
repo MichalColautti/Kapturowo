@@ -7,9 +7,14 @@ const fs = require('fs');
 const path = require('path');
 const app = express();
 const bcrypt = require('bcrypt');
+const Stripe = require("stripe");
+require("dotenv").config();
 
 app.use(cors());
 app.use(express.json());
+
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
 
 app.use('/product_images', express.static(path.join(__dirname, 'product_images')));
 app.use('/image_slider', express.static(path.join(__dirname, 'image_slider')));
@@ -377,6 +382,37 @@ app.get("/api/products/:id/sizes", async (req, res) => {
   }
 });
 
+
+// Endpoint do tworzenia sesji płatności Stripe
+app.post("/api/payment/create-checkout-session", async (req, res) => {
+  const { cartItems } = req.body;
+
+  try {
+    const line_items = cartItems.map((item) => ({
+      price_data: {
+        currency: "pln",
+        product_data: {
+          name: `${item.name} (Rozmiar: ${item.size})`,
+        },
+        unit_amount: Math.round(item.price * 100),
+      },
+      quantity: item.quantity,
+    }));
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items,
+      mode: "payment",
+      success_url: "http://localhost:3000/success",
+      cancel_url: "http://localhost:3000/cancel",
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error("Stripe error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.listen(5000, '0.0.0.0', () => {
   console.log('Serwer backend działa na porcie 5000');

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { loadStripe } from "@stripe/stripe-js";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -31,6 +32,26 @@ function Cart() {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
+const handlePayment = async () => {
+  const stripe = await stripePromise;
+
+  fetch("/api/payment/create-checkout-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ cartItems }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    })
+    .catch(err => console.error("Błąd płatności:", err));
+};
 
   return (
     <div className="container mt-4">
@@ -66,6 +87,10 @@ function Cart() {
           </ul>
           <div className="mt-3 text-end">
             <strong>Łącznie: {total.toFixed(2)} zł</strong>
+            <br />
+            <button className="btn btn-primary mt-2" onClick={handlePayment}>
+              Przejdź do płatności
+            </button>
           </div>
         </div>
       )}
