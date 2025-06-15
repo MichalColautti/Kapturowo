@@ -58,6 +58,10 @@ function SearchResults() {
           <>
             <p>Brak wyników wyszukiwania dla "{query}".</p>
             <ProductSlider products={products} title="Zobacz inne produkty" />
+            <ProductSlider
+              products={latestProducts}
+              title="Najnowsze produkty"
+            />
           </>
         )}
       </div>

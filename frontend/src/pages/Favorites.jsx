@@ -1,15 +1,32 @@
 import React, { useEffect, useState } from "react";
 import Products_grid from "../components/Products_grid";
-import { useAuth } from "../AuthContext"; 
-
-function Favorites({ }) {
+import { useAuth } from "../AuthContext";
+import ProductSlider from "../components/Products_slider";
+function Favorites({}) {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useAuth();
   const userId = user?.id;
+  const [products, setProducts] = useState([]);
+  const [latestProducts, setLatestProducts] = useState([]);
+  useEffect(() => {
+    // Produkty
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch((err) => console.error("Błąd pobierania produktów:", err));
 
-  useEffect(() => {    
+    // Najnowsze produkty
+    fetch("/api/products/latest")
+      .then((res) => res.json())
+      .then((data) => setLatestProducts(data))
+      .catch((err) =>
+        console.error("Błąd pobierania najnowszych produktów:", err)
+      );
+  }, []);
+
+  useEffect(() => {
     if (!userId) return;
 
     setLoading(true);
@@ -43,13 +60,34 @@ function Favorites({ }) {
   }
 
   if (favorites.length === 0) {
-    return <p>Brak ulubionych produktów.</p>;
+    return (
+      <div className="container mt-4">
+        <div className="mb-4">
+          <h2
+            className="text-start border-bottom pb-2"
+            style={{ fontWeight: 400 }}
+          >
+            Ulubione
+          </h2>
+        </div>
+        <p>Brak ulubionych produktów.</p>
+        <p>
+          Dodaj produkty do ulubionych, klikając ikonę serca na stronie
+          produktu.
+        </p>
+        <ProductSlider products={products} title="Zobacz inne produkty" />
+        <ProductSlider products={latestProducts} title="Najnowsze produkty" />
+      </div>
+    );
   }
 
   return (
     <div className="container mt-4">
       <div className="mb-4">
-        <h2 className="text-start border-bottom pb-2" style={{ fontWeight: 400 }}>
+        <h2
+          className="text-start border-bottom pb-2"
+          style={{ fontWeight: 400 }}
+        >
           Ulubione
         </h2>
       </div>
