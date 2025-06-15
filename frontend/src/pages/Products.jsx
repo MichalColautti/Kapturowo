@@ -29,13 +29,20 @@ function Produkty() {
   }, [category, audience]);
 
   return (
-    <div>
-      <h1>Produkty: {category} - {audience}</h1>
-      {products.length > 0 ? (
-        <ProductGrid products={products} title="Wyniki wyszukiwania" />
-      ) : (
-        <p>Brak produktów do wyświetlenia.</p>
-      )}
+    <div className="container mt-4">
+      <div className="mb-4">
+        <h2
+          className="text-start border-bottom pb-2"
+          style={{ fontWeight: 400 }}
+        >
+          Produkty: {category} - {audience}
+        </h2>
+        {products.length > 0 ? (
+          <ProductGrid products={products} title="Wyniki wyszukiwania" />
+        ) : (
+          <p>Brak produktów do wyświetlenia.</p>
+        )}
+      </div>
     </div>
   );
 }

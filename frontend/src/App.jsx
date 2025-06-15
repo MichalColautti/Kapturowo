@@ -9,14 +9,16 @@ import New_products from "./pages/New_products";
 import Sale from "./pages/Sale";
 import Header from "./components/Header"; // Możliwe że tu bedzie wyświetlał się błąd, ale to normalne
 import Footer from "./components/Footer";
+import Cancel from "./pages/Cancel";
+import Success from "./pages/Success";
 import "./App.css";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Products from "./pages/Products";
 import SearchResults from "./pages/SearchResults";
-import ProductDetails from "./pages/ProductDetails"; 
-import Cart from "./pages/Cart"; 
+import ProductDetails from "./pages/ProductDetails";
+import Cart from "./pages/Cart";
 import { AuthProvider } from "./AuthContext";
 
 function App() {
@@ -34,11 +36,13 @@ function App() {
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} /> 
-          <Route path="/products" element={<Products />} /> 
-          <Route path="/search" element={<SearchResults />} /> 
-          <Route path="/product/:id" element={<ProductDetails />} /> 
+          <Route path="/register" element={<Register />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/search" element={<SearchResults />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/cancel" element={<Cancel />} />
+          <Route path="/success" element={<Success />} />
         </Routes>
       </AuthProvider>
       <Footer />
