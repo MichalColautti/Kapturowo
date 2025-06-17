@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 
-function Product({ id: productId, name, price, imageUrl, imageHeight, imageAspectRatio, userId }) {
+function Product({
+  id: productId,
+  name,
+  price,
+  imageUrl,
+  imageHeight,
+  imageAspectRatio,
+  userId,
+}) {
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
 
     fetch(`/api/favorites/check?userId=${userId}&productId=${productId}`)
-      .then(res => res.json())
-      .then(data => setIsFavorite(data.isFavorite))
-      .catch(err => console.error("Błąd pobierania ulubionych:", err));
+      .then((res) => res.json())
+      .then((data) => setIsFavorite(data.isFavorite))
+      .catch((err) => console.error("Błąd pobierania ulubionych:", err));
   }, [userId, productId]);
 
   const toggleFavorite = () => {
@@ -32,16 +40,36 @@ function Product({ id: productId, name, price, imageUrl, imageHeight, imageAspec
     });
   };
 
-  const aspectRatioStyle = imageAspectRatio ? { aspectRatio: imageAspectRatio } : {};
+  const aspectRatioStyle = imageAspectRatio
+    ? { aspectRatio: imageAspectRatio }
+    : {};
 
   return (
-    <div className="card" style={{ width: "18rem", margin: "5px", position: "relative" }}>
-      <Link to={`/product/${productId}`} style={{ textDecoration: "none", color: "inherit" }}>
-        <div className="card-img-container" style={{ height: imageHeight, overflow: "hidden", ...aspectRatioStyle }}>
-          <img src={imageUrl} className="card-img-top cropped-image" alt={name} style={{ width: "100%" }} />
+    <div
+      className="card"
+      style={{ width: "18rem", margin: "5px", position: "relative" }}
+    >
+      <Link
+        to={`/product/${productId}`}
+        style={{ textDecoration: "none", color: "inherit" }}
+      >
+        <div
+          className="card-img-container"
+          style={{
+            height: imageHeight,
+            overflow: "hidden",
+            ...aspectRatioStyle,
+          }}
+        >
+          <img
+            src={imageUrl}
+            className="card-img-top cropped-image"
+            alt={name}
+            style={{ width: "100%" }}
+          />
         </div>
       </Link>
-      
+
       <button
         className={`favorite-button ${isFavorite ? "active" : ""}`}
         style={{
@@ -70,8 +98,12 @@ function Product({ id: productId, name, price, imageUrl, imageHeight, imageAspec
       </button>
 
       <div className="card-body">
-        <p className="card-title" style={{ fontSize: "0.8em" }}>{name}</p>
-        <p className="card-text" style={{ fontSize: "0.8em" }}>{price}</p>
+        <p className="card-title" style={{ fontSize: "0.8em" }}>
+          {name}
+        </p>
+        <p className="card-text" style={{ fontSize: "0.8em" }}>
+          {price}
+        </p>
       </div>
     </div>
   );

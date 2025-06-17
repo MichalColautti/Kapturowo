@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 
 function ProductDetails() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [sizes, setSizes] = useState([]);
   const [selectedSize, setSelectedSize] = useState("");
@@ -26,25 +26,25 @@ function ProductDetails() {
     42: 12,
   };
 
-
   useEffect(() => {
     fetch(`/api/products/${id}`)
-      .then(res => res.json())
-      .then(data => setProduct(data))
-      .catch(err => console.error("Błąd ładowania szczegółów produktu:", err));
+      .then((res) => res.json())
+      .then((data) => setProduct(data))
+      .catch((err) =>
+        console.error("Błąd ładowania szczegółów produktu:", err)
+      );
   }, [id]);
 
   useEffect(() => {
     fetch(`/api/products/${id}/sizes`)
-      .then(res => res.json())
-      .then(data => {
-        console.log("Odebrane rozmiary:", data);  
+      .then((res) => res.json())
+      .then((data) => {
         setSizes(data);
         if (data.length > 0) {
-          setSelectedSize(data[0].size); 
+          setSelectedSize(data[0].size);
         }
       })
-      .catch(err => console.error("Błąd ładowania rozmiarów:", err));
+      .catch((err) => console.error("Błąd ładowania rozmiarów:", err));
   }, [id]);
 
   const addToCart = async () => {
@@ -64,7 +64,7 @@ function ProductDetails() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId,
-          productId: parseInt(id), 
+          productId: parseInt(id),
           sizeId: sizeMap[selectedSize],
           quantity: parseInt(quantity),
         }),
@@ -88,7 +88,11 @@ function ProductDetails() {
   return (
     <div className="container mt-4">
       <h2>{product.name}</h2>
-      <img src={product.imageUrl} alt={product.name} style={{ width: "100%", maxWidth: 400 }} />
+      <img
+        src={product.imageUrl}
+        alt={product.name}
+        style={{ width: "100%", maxWidth: 400 }}
+      />
       <p>Cena: {product.price} zł</p>
       <p>Dla: {product.target_audience || "Dla każdego"}</p>
 
@@ -97,7 +101,7 @@ function ProductDetails() {
         <select
           className="form-select"
           value={selectedSize}
-          onChange={e => setSelectedSize(e.target.value)}
+          onChange={(e) => setSelectedSize(e.target.value)}
         >
           {sizes.map(({ size }) => (
             <option key={size} value={size}>
@@ -114,7 +118,7 @@ function ProductDetails() {
           className="form-control"
           min="1"
           value={quantity}
-          onChange={e => setQuantity(e.target.value)}
+          onChange={(e) => setQuantity(e.target.value)}
           style={{ maxWidth: 100 }}
         />
       </div>
