@@ -64,7 +64,7 @@ app.post('/api/register', async (req, res) => {
         console.error('Błąd przy zapisie:', err);
         return res.status(500).json({ message: 'Błąd serwera xd' });
       }
-      // Zwracamy id nowo utworzonego użytkownika
+
       return res.status(201).json({ 
         message: 'Użytkownik zarejestrowany', 
         id: results.insertId, 
@@ -300,7 +300,12 @@ app.get('/api/products/:id', async (req, res) => {
 // Endpoint do dodawania produktu do koszyka
 app.post("/api/cart", async (req, res) => {
   const { userId, productId, sizeId, quantity } = req.body;
-  console.log('recived add to cart req:',req.body);
+  console.log('Received add to cart req:', req.body);
+
+  if (!userId || !productId || !sizeId || !quantity || quantity <= 0) {
+    return res.status(400).json({ error: "Nieprawidłowe dane wejściowe" });
+  }
+
   try {
     const [existing] = await db.promise().execute(
       "SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ? AND size_id = ?",
@@ -365,52 +370,203 @@ app.get("/api/cart/:userId", async (req, res) => {
 });
 
 // Endpoint do pobierania rozmiarów produktów
-app.get("/api/products/:id/sizes", async (req, res) => {
-  const { id } = req.params;
+app.post('/api/payment/create-checkout-session', async (req, res) => {
   try {
-    const [rows] = await db.promise().execute(
-      `SELECT s.id, s.size
-       FROM sizes s
-       JOIN product_sizes ps ON s.id = ps.size_id
-       WHERE ps.product_id = ?`,
-      [id]
+    const {
+      cartItems,
+      userId,
+      address: {
+        country,
+        city,
+        postalCode,
+        street,
+        buildingNumber,
+        apartmentNumber
+      }
+    } = req.body;
+
+    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    const [orderResult] = await db.promise().execute(
+      `INSERT INTO orders (
+        user_id, total_price, country, city, postal_code, street, building_number, apartment_number
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [userId, total, country, city, postalCode, street, buildingNumber, apartmentNumber]
     );
-    res.json(rows);
+
+    const orderId = orderResult.insertId;
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: cartItems.map(item => ({
+        price_data: {
+          currency: 'pln',
+          product_data: {
+            name: `${item.name} (${item.size})`,
+          },
+          unit_amount: Math.round(item.price * 100),
+        },
+        quantity: item.quantity,
+      })),
+      success_url: 'http://localhost/success',
+      cancel_url: 'http://localhost/cart',
+      metadata: {
+        user_id: userId.toString(),
+        country,
+        city,
+        postalCode,
+        street,
+        buildingNumber,
+        apartmentNumber,
+        order_data: JSON.stringify(cartItems),
+      }
+    });
+
+    res.json({ sessionId: session.id });
+
   } catch (err) {
-    console.error("Błąd pobierania rozmiarów:", err);
-    res.status(500).json({ error: "Wewnętrzny błąd serwera" });
+    console.error("Błąd w create-checkout-session:", err);
+    res.status(500).json({ error: "Błąd serwera" });
   }
 });
 
+// Endpoint do obsługi webhooków Stripe
+app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
 
-// Endpoint do tworzenia sesji płatności Stripe
-app.post("/api/payment/create-checkout-session", async (req, res) => {
-  const { cartItems } = req.body;
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.error('Webhook signature verification failed.', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+
+    const userId = session.metadata.user_id;
+    const orderData = JSON.parse(session.metadata.order_data); 
+
+    try {
+      const total = orderData.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+      const [orderResult] = await db.promise().execute(
+        `INSERT INTO orders (
+          user_id, total_price, country, city, postal_code, street, building_number, apartment_number
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          userId,
+          total,
+          session.metadata.country,
+          session.metadata.city,
+          session.metadata.postalCode,
+          session.metadata.street,
+          session.metadata.buildingNumber,
+          session.metadata.apartmentNumber
+        ]
+      );
+
+      const orderId = orderResult.insertId;
+
+      for (const item of orderData) {
+        await db.promise().execute(
+          'INSERT INTO order_items (order_id, product_id, size_id, quantity, price) VALUES (?, ?, ?, ?, ?)',
+          [orderId, item.product_id, item.size_id, item.quantity, item.price]
+        );
+      }
+
+      await db.promise().execute(
+        'DELETE FROM cart WHERE user_id = ?',
+        [userId]
+      );
+
+      res.status(200).send('Zamówienie zapisane');
+    } catch (err) {
+      console.error('Błąd zapisu zamówienia po płatności:', err);
+      res.status(500).send();
+    }
+  } else {
+    res.status(200).send();
+  }
+});
+
+// Endpoint do pobierania rozmiarów produktów
+app.get('/api/products/:productId/sizes', async (req, res) => {
+  const productId = req.params.productId;
 
   try {
-    const line_items = cartItems.map((item) => ({
-      price_data: {
-        currency: "pln",
-        product_data: {
-          name: `${item.name} (Rozmiar: ${item.size})`,
-        },
-        unit_amount: Math.round(item.price * 100),
-      },
-      quantity: item.quantity,
-    }));
+    const [sizes] = await db.promise().query(
+      `SELECT s.id, s.size 
+       FROM sizes s
+       JOIN product_sizes ps ON ps.size_id = s.id
+       WHERE ps.product_id = ?`,
+      [productId]
+    );
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items,
-      mode: "payment",
-      success_url: "http://localhost:3000/success",
-      cancel_url: "http://localhost:3000/cancel",
+    if (sizes.length === 0) {
+      return res.status(404).json({ message: 'Rozmiary nie znalezione dla tego produktu' });
+    }
+
+    res.json(sizes);
+  } catch (err) {
+    console.error('Błąd pobierania rozmiarów:', err);
+    res.status(500).json({ error: 'Wystąpił błąd podczas pobierania rozmiarów' });
+  }
+});
+
+// Endpoint do pobierania rozmiarów produktów
+app.get('/api/orders/:userId', async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    const [orders] = await db.promise().query(
+      `SELECT 
+         id, created_at, total_price, 
+         street, building_number, apartment_number, postal_code, city, country
+       FROM orders
+       WHERE user_id = ?`,
+      [userId]
+    );
+
+    const orderIds = orders.map(o => o.id);
+    let items = [];
+    if (orderIds.length > 0) {
+      const [orderItems] = await db.promise().query(
+        `SELECT oi.*, p.name, s.size
+         FROM order_items oi
+         JOIN products p ON oi.product_id = p.id
+         JOIN sizes s ON oi.size_id = s.id
+         WHERE oi.order_id IN (?)`,
+        [orderIds]
+      );
+      items = orderItems;
+    }
+
+    const ordersWithItems = orders.map(order => {
+      const orderItems = items.filter(item => item.order_id === order.id);
+      return {
+        ...order,
+        address: `${order.street} ${order.building_number}${order.apartment_number ? '/' + order.apartment_number : ''}, ${order.postal_code} ${order.city}, ${order.country}`,
+        items: orderItems.map(i => ({
+          id: i.id,
+          name: i.name,
+          size: i.size,
+          quantity: i.quantity,
+          price: i.price
+        }))
+      };
     });
 
-    res.json({ url: session.url });
-  } catch (err) {
-    console.error("Stripe error:", err.message);
-    res.status(500).json({ error: err.message });
+    res.json(ordersWithItems);
+  } catch (error) {
+    console.error('Błąd pobierania zamówień:', error);
+    res.status(500).json({ error: 'Wystąpił błąd podczas pobierania zamówień' });
   }
 });
 

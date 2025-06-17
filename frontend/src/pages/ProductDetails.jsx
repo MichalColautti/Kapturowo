@@ -38,6 +38,7 @@ function ProductDetails() {
     fetch(`/api/products/${id}/sizes`)
       .then(res => res.json())
       .then(data => {
+        console.log("Odebrane rozmiary:", data);  
         setSizes(data);
         if (data.length > 0) {
           setSelectedSize(data[0].size); 

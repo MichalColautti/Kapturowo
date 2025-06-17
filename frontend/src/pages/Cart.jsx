@@ -3,7 +3,15 @@ import { loadStripe } from "@stripe/stripe-js";
 
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
-  const userId = 1; 
+  const [address, setAddress] = useState({
+    country: "",
+    city: "",
+    postalCode: "",
+    street: "",
+    buildingNumber: "",
+    apartmentNumber: ""
+  });
+  const userId = 1;
 
   const fetchCart = () => {
     fetch(`/api/cart/${userId}`)
@@ -33,25 +41,30 @@ function Cart() {
     0
   );
 
-  
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-const handlePayment = async () => {
-  const stripe = await stripePromise;
+  const handlePayment = async () => {
+    const stripe = await stripePromise;
 
-  fetch("/api/payment/create-checkout-session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ cartItems }),
-  })
+    const data = {
+      cartItems,
+      userId,
+      address
+    };
+
+    fetch('/api/payment/create-checkout-session', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: { 'Content-Type': 'application/json' }
+    })
     .then(res => res.json())
-    .then(data => {
-      if (data.url) {
-        window.location.href = data.url;
+    .then(({ sessionId }) => {
+      if (sessionId) {
+        stripe.redirectToCheckout({ sessionId });
       }
     })
-    .catch(err => console.error("Błąd płatności:", err));
-};
+    .catch(err => console.error(err));
+  };
 
   return (
     <div className="container mt-4">
@@ -85,6 +98,30 @@ const handlePayment = async () => {
               </li>
             ))}
           </ul>
+
+          {/* 🏠 Adres dostawy */}
+          <div className="mt-4">
+            <h4>Adres dostawy</h4>
+            <div className="row">
+              <div className="col-md-6">
+                <input type="text" className="form-control mb-2" placeholder="Kraj"
+                  value={address.country} onChange={(e) => setAddress({ ...address, country: e.target.value })} />
+                <input type="text" className="form-control mb-2" placeholder="Miasto"
+                  value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} />
+                <input type="text" className="form-control mb-2" placeholder="Kod pocztowy"
+                  value={address.postalCode} onChange={(e) => setAddress({ ...address, postalCode: e.target.value })} />
+              </div>
+              <div className="col-md-6">
+                <input type="text" className="form-control mb-2" placeholder="Ulica"
+                  value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} />
+                <input type="text" className="form-control mb-2" placeholder="Numer budynku"
+                  value={address.buildingNumber} onChange={(e) => setAddress({ ...address, buildingNumber: e.target.value })} />
+                <input type="text" className="form-control mb-2" placeholder="Numer mieszkania"
+                  value={address.apartmentNumber} onChange={(e) => setAddress({ ...address, apartmentNumber: e.target.value })} />
+              </div>
+            </div>
+          </div>
+
           <div className="mt-3 text-end">
             <strong>Łącznie: {total.toFixed(2)} zł</strong>
             <br />
