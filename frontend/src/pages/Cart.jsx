@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import ProductSlider from "../components/Products_slider";
-import "bootstrap/dist/css/bootstrap.min.css"; // Upewnij się, że to jest zaimportowane gdzieś globalnie w Twojej aplikacji
+import { useAuth } from "../AuthContext";
 
 function Cart() {
+  const { user } = useAuth();
+  const userId = user?.id;
+
   const [cartItems, setCartItems] = useState([]);
   const [address, setAddress] = useState({
     country: "",
@@ -13,257 +15,154 @@ function Cart() {
     buildingNumber: "",
     apartmentNumber: ""
   });
-  const userId = 1;
-
-  const fetchCart = () => {
-    fetch(`/api/cart/${userId}`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => setCartItems(data))
-      .catch((err) => {
-        console.error("Błąd pobierania koszyka:", err);
-      });
-  };
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+    if (!userId) return;
 
-  const updateQuantity = (productId, sizeId, delta) => {
-    const currentItem = cartItems.find(
-      (item) => item.product_id === productId && item.size_id === sizeId
-    );
+    fetch(`/api/cart/${userId}`)
+      .then(res => res.json())
+      .then(data => setCartItems(data))
+      .catch(err => console.error("Błąd pobierania koszyka:", err));
+  }, [userId]);
 
-    if (!currentItem) return;
-
-    const newQuantity = Math.max(1, currentItem.quantity + delta);
-
-    // Optymistyczna aktualizacja UI
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.product_id === productId && item.size_id === sizeId
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
-    );
-
-    // Wysyłanie żądania do API
-    fetch(`/api/cart/update-quantity`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, productId, sizeId, newQuantity }),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          console.error("Błąd aktualizacji ilości na backendzie:", res.status);
-          fetchCart();
-        }
-      })
-      .catch((err) => {
-        console.error("Błąd sieci podczas aktualizacji ilości:", err);
-        fetchCart();
-      });
+  const validate = () => {
+    const newErrors = {};
+    if (!address.country) newErrors.country = "Wymagane";
+    if (!address.city) newErrors.city = "Wymagane";
+    if (!address.postalCode) newErrors.postalCode = "Wymagane";
+    if (!address.street) newErrors.street = "Wymagane";
+    if (!address.buildingNumber) newErrors.buildingNumber = "Wymagane";
+    if (!address.apartmentNumber) newErrors.apartmentNumber = "Wymagane";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const removeFromCart = (productId, sizeId) => {
-    // Optymistyczne usunięcie z UI
-    setCartItems((prevItems) =>
-      prevItems.filter(
-        (item) => !(item.product_id === productId && item.size_id === sizeId)
-      )
-    );
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setAddress(prev => ({ ...prev, [name]: value }));
+  };
 
+  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
+  const handlePayment = async () => {
+    if (!validate()) return;
+
+    const stripe = await stripePromise;
+
+    fetch("/api/payment/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cartItems, userId, address }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.sessionId) {
+          stripe.redirectToCheckout({ sessionId: data.sessionId });
+        } else if (data.error) {
+          alert(data.error);
+        }
+      })
+      .catch(err => console.error("Błąd płatności:", err));
+  };
+
+  const handleRemoveItem = (productId, sizeId) => {
     fetch(`/api/cart`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, productId, sizeId }),
     })
-      .then((res) => {
-        if (!res.ok) {
-          console.error("Błąd usuwania z koszyka na backendzie:", res.status);
-          fetchCart();
-        }
-      })
-      .catch((err) => {
-        console.error("Błąd sieci podczas usuwania z koszyka:", err);
-        fetchCart();
-      });
+    .then(res => {
+      if (!res.ok) throw new Error("Nie udało się usunąć produktu");
+      setCartItems(prevItems =>
+        prevItems.filter(
+          item => !(item.product_id === productId && item.size_id === sizeId)
+        )
+      );
+    })
+    .catch(err => alert(err.message));
   };
 
-  const total = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
-
-  const handlePayment = async () => {
-    const stripe = await stripePromise;
-
-    const data = {
-      cartItems,
-      userId,
-      address
-    };
-
-    fetch('/api/payment/create-checkout-session', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(res => res.json())
-    .then(({ sessionId }) => {
-      if (sessionId) {
-        stripe.redirectToCheckout({ sessionId });
-      }
-    })
-    .catch(err => console.error(err));
-  };
+  if (!userId) {
+    return <p>Musisz być zalogowany, aby zobaczyć koszyk.</p>;
+  }
 
   return (
-    <div className="container mt-5" style={{ maxWidth: "900px" }}>
-      <div className="mb-4">
-        <h2
-          className="text-start border-bottom pb-3 mb-4"
-          style={{ fontWeight: 400 }}
-        >
-          Koszyk
-        </h2>
-
-        {cartItems.length === 0 ? (
-          <div className="text-center py-5">
-            <p className="lead mb-4">
-              Koszyk wygląda na pusty? Zobacz naszą kolekcję.
-            </p>
-            {/* Przekazuję propsy imageHeight i imageAspectRatio do ProductSlider,
-                jeśli ProductSlider ich potrzebuje do stylizacji obrazków */}
-            <ProductSlider
-              products={products}
-              title="Zobacz inne produkty"
-              imageHeight="250px" // Przykładowa wysokość, dostosuj
-              imageAspectRatio="3/4" // Przykładowy aspect ratio, dostosuj
-            />
-            <ProductSlider
-              products={latestProducts}
-              title="Najnowsze produkty"
-              imageHeight="250px" // Przykładowa wysokość, dostosuj
-              imageAspectRatio="3/4" // Przykładowy aspect ratio, dostosuj
-            />
-          </div>
-        ) : (
-          <div>
+    <div className="container mt-4">
+      <h2>Koszyk</h2>
+      {cartItems.length === 0 ? (
+        <p>Koszyk jest pusty.</p>
+      ) : (
+        <>
+          <ul className="list-group mb-3">
             {cartItems.map((item) => (
-              <div
+              <li
                 key={`${item.product_id}-${item.size_id}`}
-                className="d-flex align-items-start py-4 border-bottom"
+                className="list-group-item d-flex justify-content-between align-items-center"
               >
-                {/* Lewa kolumna: Obrazek */}
-                <div
-                  className="flex-shrink-0 me-4"
-                  style={{ width: "110px", height: "160px" }}
-                >
-                  {/* TUTAJ ZMIANA: Używam item.imageUrl, tak jak w komponencie Product */}
-                  {item.imageUrl && (
-                    <img
-                      src={item.imageUrl} // Zmieniono na item.imageUrl
-                      alt={item.name}
-                      className="img-fluid rounded"
-                      style={{
-                        objectFit: "cover",
-                        width: "100%",
-                        height: "100%",
-                      }}
-                    />
-                  )}
+                <div>
+                  <strong>{item.name}</strong> — {item.price} zł x {item.quantity}
+                  <br />
+                  <small>Rozmiar: {item.size}</small>
                 </div>
-
-                {/* Środkowa kolumna: Nazwa, Rozmiar, Ilość */}
-                <div className="flex-grow-1 d-flex flex-column justify-content-start pt-1">
-                  <h3 className="fs-5 fw-bold text-uppercase mb-2 text-dark">
-                    {item.name}
-                  </h3>
-                  <p className="text-muted small mb-1">
-                    Rozmiar: <span className="fw-semibold">{item.size}</span>
-                  </p>
-                  <div className="d-flex align-items-center mt-2">
-                    <span className="small text-muted me-2">Ilość:</span>
-                    <button
-                      className="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
-                      style={{ width: "28px", height: "28px", padding: 0 }}
-                      onClick={() =>
-                        updateQuantity(item.product_id, item.size_id, -1)
-                      }
-                    >
-                      -
-                    </button>
-                    <span className="mx-2 fw-semibold text-dark">
-                      {item.quantity}
-                    </span>
-                    <button
-                      className="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
-                      style={{ width: "28px", height: "28px", padding: 0 }}
-                      onClick={() =>
-                        updateQuantity(item.product_id, item.size_id, 1)
-                      }
-                    >
-                      +
-                    </button>
-                    <button
-                      className="btn btn-link text-danger text-decoration-none ms-3 small"
-                      onClick={() =>
-                        removeFromCart(item.product_id, item.size_id)
-                      }
-                    >
-                      Usuń
-                    </button>
-                  </div>
-                </div>
-
-                {/* Prawa kolumna: Cena */}
-                <div className="flex-shrink-0 d-flex flex-column align-items-end ms-auto ps-4">
-                  <span className="fs-5 fw-bold text-dark">
+                <div className="d-flex align-items-center">
+                  <span className="me-3">
                     {(item.price * item.quantity).toFixed(2)} zł
                   </span>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleRemoveItem(item.product_id, item.size_id)}
+                  >
+                    Usuń
+                  </button>
                 </div>
-              </div>
+              </li>
             ))}
           </ul>
 
-          {/* 🏠 Adres dostawy */}
-          <div className="mt-4">
-            <h4>Adres dostawy</h4>
-            <div className="row">
-              <div className="col-md-6">
-                <input type="text" className="form-control mb-2" placeholder="Kraj"
-                  value={address.country} onChange={(e) => setAddress({ ...address, country: e.target.value })} />
-                <input type="text" className="form-control mb-2" placeholder="Miasto"
-                  value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} />
-                <input type="text" className="form-control mb-2" placeholder="Kod pocztowy"
-                  value={address.postalCode} onChange={(e) => setAddress({ ...address, postalCode: e.target.value })} />
+          <h3>Adres dostawy</h3>
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              handlePayment();
+            }}
+            noValidate
+          >
+            {[
+              { label: "Kraj", name: "country" },
+              { label: "Miasto", name: "city" },
+              { label: "Kod pocztowy", name: "postalCode" },
+              { label: "Ulica", name: "street" },
+              { label: "Numer budynku", name: "buildingNumber" },
+              { label: "Numer mieszkania", name: "apartmentNumber" },
+            ].map(({ label, name }) => (
+              <div key={name} className="mb-2">
+                <label className="form-label">{label}</label>
+                <input
+                  type="text"
+                  className={`form-control ${errors[name] ? "is-invalid" : ""}`}
+                  name={name}
+                  value={address[name]}
+                  onChange={handleInputChange}
+                  required
+                />
+                {errors[name] && (
+                  <div className="invalid-feedback">{errors[name]}</div>
+                )}
               </div>
-              <div className="col-md-6">
-                <input type="text" className="form-control mb-2" placeholder="Ulica"
-                  value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} />
-                <input type="text" className="form-control mb-2" placeholder="Numer budynku"
-                  value={address.buildingNumber} onChange={(e) => setAddress({ ...address, buildingNumber: e.target.value })} />
-                <input type="text" className="form-control mb-2" placeholder="Numer mieszkania"
-                  value={address.apartmentNumber} onChange={(e) => setAddress({ ...address, apartmentNumber: e.target.value })} />
-              </div>
-            </div>
-          </div>
+            ))}
 
-          <div className="mt-3 text-end">
-            <strong>Łącznie: {total.toFixed(2)} zł</strong>
-            <br />
-            <button className="btn btn-primary mt-2" onClick={handlePayment}>
-              Przejdź do płatności
-            </button>
-          </div>
-        </div>
+            <div className="text-end mt-3">
+              <strong>Łącznie: {total.toFixed(2)} zł</strong>
+              <br />
+              <button type="submit" className="btn btn-primary mt-2">
+                Przejdź do płatności
+              </button>
+            </div>
+          </form>
+        </>
       )}
     </div>
   );

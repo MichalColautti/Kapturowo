@@ -392,15 +392,24 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
     const {
       cartItems,
       userId,
-      address: {
-        country,
-        city,
-        postalCode,
-        street,
-        buildingNumber,
-        apartmentNumber
-      }
+      address
     } = req.body;
+
+    if (!userId || !cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+      return res.status(400).json({ error: "Nieprawidłowe dane zamówienia" });
+    }
+
+    if (
+      !address ||
+      !address.country ||
+      !address.city ||
+      !address.postalCode ||
+      !address.street ||
+      !address.buildingNumber ||
+      !address.apartmentNumber 
+    ) {
+      return res.status(400).json({ error: "Wszystkie pola adresu muszą być wypełnione, w tym numer mieszkania." });
+    }
 
     const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -408,7 +417,16 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
       `INSERT INTO orders (
         user_id, total_price, country, city, postal_code, street, building_number, apartment_number
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [userId, total, country, city, postalCode, street, buildingNumber, apartmentNumber]
+      [
+        userId,
+        total,
+        address.country,
+        address.city,
+        address.postalCode,
+        address.street,
+        address.buildingNumber,
+        address.apartmentNumber
+      ]
     );
 
     const orderId = orderResult.insertId;
@@ -426,16 +444,12 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
         },
         quantity: item.quantity,
       })),
-      success_url: 'http://localhost/success',
+      success_url: 'http://localhost/success?orderId=' + orderId,
       cancel_url: 'http://localhost/cart',
       metadata: {
+        order_id: orderId.toString(),
         user_id: userId.toString(),
-        country,
-        city,
-        postalCode,
-        street,
-        buildingNumber,
-        apartmentNumber,
+        address: JSON.stringify(address),
         order_data: JSON.stringify(cartItems),
       }
     });
