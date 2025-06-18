@@ -21,11 +21,6 @@ app.use(
 );
 app.use("/image_slider", express.static(path.join(__dirname, "image_slider")));
 
-app.use((req, res, next) => {
-  res.setHeader("Content-Type", "application/json; charset=utf-8");
-  next();
-});
-
 const db = mysql.createConnection({
   host: process.env.DB_HOST || "mysql",
   user: process.env.DB_USER || "admin",
@@ -121,7 +116,8 @@ app.get("/api/products", async (req, res) => {
        FROM products
        LEFT JOIN categories ON products.category_id = categories.id`
     );
-    res.json(rows);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.end(JSON.stringify(rows));
   } catch (err) {
     console.error("Błąd przy pobieraniu produktów:", err);
     res.status(500).json({ message: "Błąd serwera" });

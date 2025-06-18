@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS products (
   name VARCHAR(255) NOT NULL,
   price DECIMAL(10,2) NOT NULL,
   imageUrl VARCHAR(255),
-  target_audience ENUM('mezczyzna', 'kobieta', 'dziecko') NOT NULL,
+  target_audience ENUM('mężczyzna', 'kobieta', 'dziecko') NOT NULL,
   category_id INT,
   FOREIGN KEY (category_id) REFERENCES categories(id)
 );
@@ -88,6 +88,10 @@ ALTER TABLE categories CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_
 ALTER TABLE cart CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE favorites CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE sizes CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE product_sizes CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE orders CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE order_items CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 INSERT INTO categories (name) VALUES ('Bluzy'), ('T-shirty'), ('Buty'), ('Akcesoria');
 
@@ -151,3 +155,5 @@ INSERT INTO product_sizes (product_id, size_id) VALUES
 (24, 5),(24, 6),(24, 7),(24, 8),(24, 9),(24, 10),(24, 11),(24, 12),
 (25, 5),(25, 6),(25, 7),(25, 8),(25, 9),(25, 10),(25, 11),(25, 12)
 ; 
+
+UPDATE products SET name = CONVERT(BINARY CONVERT(name USING latin1) USING utf8mb4);
