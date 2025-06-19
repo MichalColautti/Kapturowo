@@ -12,6 +12,12 @@ function Produkty() {
   const category = query.get("category");
   const audience = query.get("audience");
 
+  const audienceDisplayMap = {
+    mezczyzna: "mężczyzna",
+    kobieta: "kobieta",
+    dziecko: "dziecko",
+  };
+
   useEffect(() => {
     const fetchFilteredProducts = async () => {
       try {
@@ -35,7 +41,7 @@ function Produkty() {
           className="text-start border-bottom pb-2"
           style={{ fontWeight: 400 }}
         >
-          Produkty: {category} - {audience}
+          Produkty: {category} - {audienceDisplayMap[audience] || audience}
         </h2>
         {products.length > 0 ? (
           <ProductGrid products={products} title="Wyniki wyszukiwania" />

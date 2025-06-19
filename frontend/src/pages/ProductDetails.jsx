@@ -26,6 +26,12 @@ function ProductDetails() {
     42: 12,
   };
 
+  const audienceDisplayMap = {
+    mezczyzna: "mężczyzna",
+    kobieta: "kobieta",
+    dziecko: "dziecko",
+  };
+
   useEffect(() => {
     fetch(`/api/products/${id}`)
       .then((res) => res.json())
@@ -94,7 +100,7 @@ function ProductDetails() {
         style={{ width: "100%", maxWidth: 400 }}
       />
       <p>Cena: {product.price} zł</p>
-      <p>Dla: {product.target_audience || "Dla każdego"}</p>
+      <p>Dla: {audienceDisplayMap[product.target_audience] || "Dla każdego"}</p>
 
       <div className="mt-3">
         <label className="form-label">Rozmiar:</label>

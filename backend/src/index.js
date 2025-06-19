@@ -69,6 +69,11 @@ app.use(
 );
 app.use("/image_slider", express.static(path.join(__dirname, "image_slider")));
 
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
+
 const db = mysql.createConnection({
   host: process.env.DB_HOST || "mysql",
   user: process.env.DB_USER || "admin",
@@ -199,14 +204,17 @@ app.get("/api/products/filter", async (req, res) => {
   const params = [];
 
   if (category) {
-    query += " AND categories.name = ?";
+    query += " AND LOWER(categories.name) = LOWER(?)";
     params.push(category);
   }
 
   if (audience) {
-    query += " AND products.target_audience = ?";
+    query += " AND LOWER(products.target_audience) = LOWER(?)";
     params.push(audience);
   }
+
+  console.log("SQL query:", query);
+  console.log("Params:", params);
 
   try {
     const [rows] = await db.promise().execute(query, params);
@@ -343,6 +351,7 @@ app.get("/api/products/:id", async (req, res) => {
     if (rows.length === 0) {
       return res.status(404).json({ message: "Produkt nie znaleziony" });
     }
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.json(rows[0]);
   } catch (err) {
     console.error("Błąd pobierania produktu:", err);
