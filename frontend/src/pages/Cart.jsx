@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { useAuth } from "../AuthContext";
 
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+
 function Cart() {
   const { user } = useAuth();
   const userId = user?.id;
@@ -43,8 +45,6 @@ function Cart() {
     setAddress(prev => ({ ...prev, [name]: value }));
   };
 
-  const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
-
   const handlePayment = async () => {
     if (!validate()) return;
 
@@ -53,7 +53,7 @@ function Cart() {
     fetch("/api/payment/create-checkout-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cartItems, userId, address }),
+      body: JSON.stringify({ userId, cartItems, address }),
     })
       .then(res => res.json())
       .then(data => {

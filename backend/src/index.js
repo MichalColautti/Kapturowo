@@ -10,10 +10,58 @@ const bcrypt = require("bcrypt");
 const Stripe = require("stripe");
 require("dotenv").config();
 
-app.use(cors());
-app.use(express.json());
-
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Endpoint do obsługi webhooków Stripe
+app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.error('Webhook signature verification failed.', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+
+    const userId = session.metadata.user_id;
+    const orderData = JSON.parse(session.metadata.order_data);
+    const address = JSON.parse(session.metadata.address);
+
+    try {
+      const total = orderData.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+      for (const item of orderData) {
+        await db.promise().execute(
+          'INSERT INTO order_items (order_id, product_id, size_id, quantity, price) VALUES (?, ?, ?, ?, ?)',
+          [session.metadata.order_id, item.product_id, item.size_id, item.quantity, item.price]
+        );
+      }
+
+      await db.promise().execute(
+        'DELETE FROM cart WHERE user_id = ?',
+        [userId]
+      );
+
+      res.status(200).send('Zamówienie zapisane');
+    } catch (err) {
+      console.error('Błąd zapisu zamówienia po płatności:', err);
+      res.status(500).send();
+    }
+  } else {
+    res.status(200).send();
+  }
+});
+
+app.use(express.json());
+app.use(cors());
 
 app.use(
   "/product_images",
@@ -382,14 +430,10 @@ app.get("/api/cart/:userId", async (req, res) => {
   }
 });
 
-// Endpoint do pobierania rozmiarów produktów
+// Endpoint tworzący sesję Stripe Checkout
 app.post('/api/payment/create-checkout-session', async (req, res) => {
   try {
-    const {
-      cartItems,
-      userId,
-      address
-    } = req.body;
+    const { userId, cartItems, address } = req.body;
 
     if (!userId || !cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({ error: "Nieprawidłowe dane zamówienia" });
@@ -402,9 +446,9 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
       !address.postalCode ||
       !address.street ||
       !address.buildingNumber ||
-      !address.apartmentNumber 
+      !address.apartmentNumber
     ) {
-      return res.status(400).json({ error: "Wszystkie pola adresu muszą być wypełnione, w tym numer mieszkania." });
+      return res.status(400).json({ error: "Wszystkie pola adresu muszą być wypełnione" });
     }
 
     const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -436,11 +480,11 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
           product_data: {
             name: `${item.name} (${item.size})`,
           },
-          unit_amount: Math.round(item.price * 100),
+          unit_amount: Math.round(item.price * 100), 
         },
         quantity: item.quantity,
       })),
-      success_url: 'http://localhost/success?orderId=' + orderId,
+      success_url: 'http://localhost/success',
       cancel_url: 'http://localhost/cart',
       metadata: {
         order_id: orderId.toString(),
@@ -455,71 +499,6 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
   } catch (err) {
     console.error("Błąd w create-checkout-session:", err);
     res.status(500).json({ error: "Błąd serwera" });
-  }
-});
-
-// Endpoint do obsługi webhooków Stripe
-app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-
-  let event;
-  try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-  } catch (err) {
-    console.error('Webhook signature verification failed.', err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-
-    const userId = session.metadata.user_id;
-    const orderData = JSON.parse(session.metadata.order_data); 
-
-    try {
-      const total = orderData.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-      const [orderResult] = await db.promise().execute(
-        `INSERT INTO orders (
-          user_id, total_price, country, city, postal_code, street, building_number, apartment_number
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          userId,
-          total,
-          session.metadata.country,
-          session.metadata.city,
-          session.metadata.postalCode,
-          session.metadata.street,
-          session.metadata.buildingNumber,
-          session.metadata.apartmentNumber
-        ]
-      );
-
-      const orderId = orderResult.insertId;
-
-      for (const item of orderData) {
-        await db.promise().execute(
-          'INSERT INTO order_items (order_id, product_id, size_id, quantity, price) VALUES (?, ?, ?, ?, ?)',
-          [orderId, item.product_id, item.size_id, item.quantity, item.price]
-        );
-      }
-
-      await db.promise().execute(
-        'DELETE FROM cart WHERE user_id = ?',
-        [userId]
-      );
-
-      res.status(200).send('Zamówienie zapisane');
-    } catch (err) {
-      console.error('Błąd zapisu zamówienia po płatności:', err);
-      res.status(500).send();
-    }
-  } else {
-    res.status(200).send();
   }
 });
 
