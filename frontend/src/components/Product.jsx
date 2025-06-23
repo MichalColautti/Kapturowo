@@ -102,7 +102,7 @@ function Product({
           {name}
         </p>
         <p className="card-text" style={{ fontSize: "0.8em" }}>
-          {price}
+          {price} zł
         </p>
       </div>
     </div>
