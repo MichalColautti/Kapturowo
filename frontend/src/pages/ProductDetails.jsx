@@ -101,13 +101,14 @@ function ProductDetails() {
 
   if (!product)
     return (
-      <div className="text-center text-light my-5">Ładowanie produktu...</div>
+      <div className="text-center text-secondary my-5">
+        Ładowanie produktu...
+      </div> // text-secondary dla jaśniejszego tła
     );
 
   return (
-    <div className="container my-5 p-4 rounded-3 shadow-lg bg-dark text-light">
-      {" "}
-      {/* bg-dark for dark background, text-light for light text */}
+    // Zmieniamy bg-dark na bg-light, text-light na text-dark
+    <div className="container my-5 p-4 rounded-3 shadow-lg bg-light text-dark">
       <div className="row">
         {/* Product Image Section */}
         <div className="col-md-6 d-flex justify-content-center align-items-center mb-4 mb-md-0">
@@ -120,62 +121,71 @@ function ProductDetails() {
 
         {/* Product Info Section */}
         <div className="col-md-6">
-          <h1 className="display-4 fw-bold mb-3 text-white">{product.name}</h1>{" "}
-          {/* Larger, bolder title */}
-          <p className="fs-3 fw-semibold mb-2 text-info">
+          {/* Zmieniamy text-white na text-dark */}
+          <h1 className="display-4 fw-bold mb-3 text-dark">{product.name}</h1>
+          {/* text-info może zostać, lub zmienimy na inny odcień, np. text-primary */}
+          <p className="fs-3 fw-semibold mb-2 text-primary">
             {product.price} zł
-          </p>{" "}
-          {/* text-info for a subtle color highlight */}
+          </p>
           <p className="fs-5 mb-3 text-muted">
             Dla: {audienceDisplayMap[product.target_audience] || "Dla każdego"}
           </p>
           <p className="lead mb-4">
             {product.description || "Brak opisu produktu."}
-          </p>{" "}
-          {/* lead for slightly larger text */}
-          {/* Size Selection */}
-          <div className="mb-3">
-            <label htmlFor="size-select" className="form-label fs-5">
-              Rozmiar:
-            </label>
-            <select
-              id="size-select"
-              className="form-select form-select-lg bg-secondary text-light border-secondary" // Darker background for select
-              value={selectedSize}
-              onChange={(e) => setSelectedSize(e.target.value)}
-            >
-              {sizes.length > 0 ? (
-                sizes.map(({ size }) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))
-              ) : (
-                <option value="">Brak dostępnych rozmiarów</option>
-              )}
-            </select>
+          </p>
+
+          {/* ROZMIAR I ILOŚĆ OBOK SIEBIE */}
+          <div className="row g-3 mb-4 align-items-end">
+            {" "}
+            {/* Używamy 'row' i 'g-3' dla odstępów między kolumnami */}
+            {/* Size Selection */}
+            <div className="col-md-6">
+              {" "}
+              {/* Zajmuje 6 kolumn na desktopie, 12 na mniejszych */}
+              <label htmlFor="size-select" className="form-label fs-5">
+                Rozmiar:
+              </label>
+              <select
+                id="size-select"
+                className="form-select form-select-lg bg-light text-dark border-secondary" // Zmieniamy na bg-light, text-dark
+                value={selectedSize}
+                onChange={(e) => setSelectedSize(e.target.value)}
+              >
+                {sizes.length > 0 ? (
+                  sizes.map(({ size }) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))
+                ) : (
+                  <option value="">Brak dostępnych rozmiarów</option>
+                )}
+              </select>
+            </div>
+            {/* Quantity Input */}
+            <div className="col-md-6">
+              {" "}
+              {/* Zajmuje 6 kolumn na desktopie, 12 na mniejszych */}
+              <label htmlFor="quantity-input" className="form-label fs-5">
+                Ilość:
+              </label>
+              <input
+                id="quantity-input"
+                type="number"
+                // Usuwamy w-25, ponieważ teraz rozmiar jest kontrolowany przez kolumnę
+                className="form-control form-control-lg bg-light text-dark border-secondary" // Zmieniamy na bg-light, text-dark
+                min="1"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+              />
+            </div>
           </div>
-          {/* Quantity Input */}
-          <div className="mb-4">
-            <label htmlFor="quantity-input" className="form-label fs-5">
-              Ilość:
-            </label>
-            <input
-              id="quantity-input"
-              type="number"
-              className="form-control form-control-lg bg-secondary text-light border-secondary w-25" // Darker background, fixed width
-              min="1"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-            />
-          </div>
+
           {/* Add to Cart Button */}
           <button
-            className="btn btn-primary btn-lg w-100 dark-theme-button"
+            className="btn btn-primary btn-lg w-100 light-theme-button" // Zmieniamy custom class
             onClick={addToCart}
           >
-            {" "}
-            {/* Custom class for specific color */}
             Dodaj do koszyka
           </button>
         </div>

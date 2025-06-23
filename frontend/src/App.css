@@ -174,36 +174,28 @@ main {
 .product-image-max-width {
   max-width: 450px; /* Adjust as needed */
   height: auto;
+  /* Dodaj subtelny cień dla jasnego tła */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Specific button color for the dark theme feel */
-.dark-theme-button {
-  background-color: #6a0dad; /* Deep purple */
+/* Specific button color for the LIGHT theme feel */
+.light-theme-button {
+  background-color: #6a0dad; /* Nadal ten sam głęboki fiolet */
   border-color: #6a0dad;
+  color: #ffffff; /* Biały tekst na przycisku */
   transition: background-color 0.3s ease, border-color 0.3s ease,
     transform 0.2s ease;
 }
 
-.dark-theme-button:hover {
-  background-color: #8a2be2; /* Lighter purple on hover */
+.light-theme-button:hover {
+  background-color: #8a2be2; /* Jaśniejszy fiolet na hover */
   border-color: #8a2be2;
-  transform: translateY(-2px); /* Slight lift */
-  box-shadow: 0 4px 10px rgba(106, 13, 173, 0.4);
+  transform: translateY(-2px); /* Delikatne uniesienie */
+  box-shadow: 0 4px 10px rgba(106, 13, 173, 0.4); /* Cień fioletowy */
 }
 
-.dark-theme-button:active {
-  background-color: #5a0ca0 !important; /* Darker on click, !important to override Bootstrap active */
+.light-theme-button:active {
+  background-color: #5a0ca0 !important; /* Ciemniejszy na kliknięcie */
   border-color: #5a0ca0 !important;
   transform: translateY(0);
-}
-
-/* Minor adjustment for quantity input width on smaller screens if needed */
-@media (max-width: 576px) {
-  .product-image-max-width {
-    max-width: 100%; /* Full width on small screens */
-  }
-  .w-25 {
-    /* Override w-25 for quantity input on small screens */
-    width: 50% !important;
-  }
 }
