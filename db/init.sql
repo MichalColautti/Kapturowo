@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS products (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   price DECIMAL(10,2) NOT NULL,
+  description TEXT,
   imageUrl VARCHAR(255),
   target_audience ENUM('mezczyzna', 'kobieta', 'dziecko') NOT NULL,
   category_id INT,
@@ -82,8 +83,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   FOREIGN KEY (size_id) REFERENCES sizes(id)
 );
 
-ALTER DATABASE kapturowo_db CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-ALTER TABLE products CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE products CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; 
 ALTER TABLE categories CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE cart CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -92,6 +92,7 @@ ALTER TABLE sizes CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE product_sizes CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE orders CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE order_items CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE products MODIFY description TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 INSERT INTO categories (name) VALUES ('Bluzy'), ('T-shirty'), ('Buty'), ('Akcesoria');
 
@@ -128,6 +129,18 @@ INSERT INTO products (name, price, imageUrl, target_audience, category_id) VALUE
 ('Buty sportowe dla dorosłych', 2.00, '/image_slider/img_4.jpg', 'dziecko', 3)
 ;
 
+UPDATE products SET description = 'Klasyczna bluza z kapturem, idealna na każdą okazję. Wykonana z wysokiej jakości bawełny.' WHERE id = 1;
+UPDATE products SET description = 'Sportowa bluza z oddychającego materiału, doskonała na treningi i aktywny wypoczynek.' WHERE id = 2;
+UPDATE products SET description = 'Modna bluza z unikalnym nadrukiem, która wyróżni Cię z tłumu.' WHERE id = 3;
+UPDATE products SET description = 'Wygodna bluza o luźnym kroju, zapewniająca swobodę ruchów.' WHERE id = 4;
+UPDATE products SET description = 'Urocza bluza z kapturem dla najmłodszych, miękka i przyjemna w dotyku.' WHERE id = 5;
+UPDATE products SET description = 'Lekki T-shirt sportowy, idealny do aktywności fizycznej, szybko schnący.' WHERE id = 6;
+UPDATE products SET description = 'T-shirt wykonany z ekologicznej bawełny, przyjazny dla skóry i środowiska.' WHERE id = 7;
+UPDATE products SET description = 'Podstawowy T-shirt z czystej bawełny, komfortowy na co dzień.' WHERE id = 8;
+UPDATE products SET description = 'Stylowy T-shirt z grafiką, wyraź swój styl.' WHERE id = 9;
+UPDATE products SET description = 'Wesoły T-shirt dla dzieci, z zabawnym motywem.' WHERE id = 10;
+
+
 INSERT INTO product_sizes (product_id, size_id) VALUES
 (1, 2),(1, 3),(1, 4),
 (2, 2),(2, 3),(2, 4), 
@@ -157,3 +170,4 @@ INSERT INTO product_sizes (product_id, size_id) VALUES
 ; 
 
 UPDATE products SET name = CONVERT(BINARY CONVERT(name USING latin1) USING utf8mb4);
+UPDATE products SET description = CONVERT(BINARY CONVERT(description USING latin1) USING utf8mb4);

@@ -167,3 +167,43 @@ main {
   justify-content: center !important; /* Używamy !important, aby nadpisać potencjalne wyśrodkowanie z Bootstrapa */
   display: flex !important; /* Upewniamy się, że jest flexboxem */
 }
+
+/* Custom CSS to augment Bootstrap, keeping it minimal */
+
+/* Max-width for product image to prevent it from being too large on desktop */
+.product-image-max-width {
+  max-width: 450px; /* Adjust as needed */
+  height: auto;
+}
+
+/* Specific button color for the dark theme feel */
+.dark-theme-button {
+  background-color: #6a0dad; /* Deep purple */
+  border-color: #6a0dad;
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    transform 0.2s ease;
+}
+
+.dark-theme-button:hover {
+  background-color: #8a2be2; /* Lighter purple on hover */
+  border-color: #8a2be2;
+  transform: translateY(-2px); /* Slight lift */
+  box-shadow: 0 4px 10px rgba(106, 13, 173, 0.4);
+}
+
+.dark-theme-button:active {
+  background-color: #5a0ca0 !important; /* Darker on click, !important to override Bootstrap active */
+  border-color: #5a0ca0 !important;
+  transform: translateY(0);
+}
+
+/* Minor adjustment for quantity input width on smaller screens if needed */
+@media (max-width: 576px) {
+  .product-image-max-width {
+    max-width: 100%; /* Full width on small screens */
+  }
+  .w-25 {
+    /* Override w-25 for quantity input on small screens */
+    width: 50% !important;
+  }
+}
