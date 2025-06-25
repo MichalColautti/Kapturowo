@@ -1,42 +1,201 @@
-#root {
-  max-width: 1280px;
+:root {
+  --icon-color: #333333;
+  --icon-hover-color: #747474;
+}
+
+.nav-link:hover::after,
+.dropdown-toggle:hover::after {
+  width: 100%;
+}
+
+.nav-link::after,
+.dropdown-toggle::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: #7a7a7a;
+  transition: width 0.5s ease;
+  display: block;
+}
+
+.nav-item.dropdown > .nav-link.dropdown-toggle::after {
+  content: ""; /* Usuwa ikonę strzałki */
+  border: none; /* Usuwa obramowanie tworzące strzałkę */
+}
+
+.nav-link:hover,
+.dropdown-toggle:hover {
+  color: #747474 !important;
+}
+
+.nav-link,
+.dropdown-toggle {
+  color: #333 !important;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.5s ease;
+}
+
+.btn-link svg {
+  color: var(--icon-color);
+  transition: color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-link:hover svg {
+  color: var(--icon-hover-color);
+}
+
+.search-wrapper {
+  max-width: 400px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.search-wrapper input.form-control {
+  transition: padding-left 0.3s ease, border-color 0.3s ease;
+}
+
+.search-wrapper input.form-control:focus {
+  padding-left: 2.5rem;
+}
+
+.search-wrapper button {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  padding: 0;
+  background: transparent;
+  border: none;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-wrapper button svg {
+  transition: transform 0.4s ease, color 0.4s ease;
+  transform: scale(1);
+  color: #555;
+}
+
+.search-wrapper input.form-control:focus ~ button svg {
+  transform: scale(1.2);
+  color: var(--icon-hover-color);
+}
+
+footer a {
+  text-decoration: none;
+}
+
+main {
+  width: 100%;
+}
+
+.favorite-button svg {
+  transition: fill 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-img-container {
+  overflow: hidden;
+}
+
+.cropped-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mega-menu {
+  display: none;
+  position: fixed;
+  top: 64px; /* przylega do headera */
+  left: 0;
+  width: 100vw;
+  background-color: #fff;
+  border-bottom: 1px solid #e5e5e5;
+  z-index: 999;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+}
+
+.mega-menu .d-flex {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  gap: 0rem; /* Zmieniony odstęp */
+  justify-content: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Pokaż menu przy hoverze */
+.nav-item.dropdown:hover .mega-menu {
+  display: block;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Styl linków */
+.mega-menu ul li a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+  padding: 0.25rem 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.mega-menu ul li a:hover {
+  color: #d33;
 }
 
-.card {
-  padding: 2em;
+.mega-menu.show .d-flex > div {
+  /* Dodajemy klasę .show do selektora .mega-menu */
+  width: auto !important; /* !important wymusi nadpisanie innych stylów */
+  margin-right: 1rem !important;
 }
 
-.read-the-docs {
-  color: #888;
+.mega-menu.show .d-flex > div:last-child {
+  margin-right: 0 !important;
+}
+
+.mega-menu.show .d-flex {
+  /* Dodajemy klasę .show do selektora .mega-menu */
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 6rem !important; /* Używamy !important, aby nadpisać potencjalny gap z Bootstrapa */
+  justify-content: center !important; /* Używamy !important, aby nadpisać potencjalne wyśrodkowanie z Bootstrapa */
+  display: flex !important; /* Upewniamy się, że jest flexboxem */
+}
+
+/* Custom CSS to augment Bootstrap, keeping it minimal */
+
+/* Max-width for product image to prevent it from being too large on desktop */
+.product-image-max-width {
+  max-width: 450px; /* Adjust as needed */
+  height: auto;
+  /* Dodaj subtelny cień dla jasnego tła */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Specific button color for the LIGHT theme feel */
+.light-theme-button {
+  background-color: #6a0dad; /* Nadal ten sam głęboki fiolet */
+  border-color: #6a0dad;
+  color: #ffffff; /* Biały tekst na przycisku */
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    transform 0.2s ease;
+}
+
+.light-theme-button:hover {
+  background-color: #8a2be2; /* Jaśniejszy fiolet na hover */
+  border-color: #8a2be2;
+  transform: translateY(-2px); /* Delikatne uniesienie */
+  box-shadow: 0 4px 10px rgba(106, 13, 173, 0.4); /* Cień fioletowy */
+}
+
+.light-theme-button:active {
+  background-color: #5a0ca0 !important; /* Ciemniejszy na kliknięcie */
+  border-color: #5a0ca0 !important;
+  transform: translateY(0);
 }
