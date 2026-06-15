@@ -8,9 +8,47 @@ const path = require("path");
 const app = express();
 const bcrypt = require("bcrypt");
 const Stripe = require("stripe");
+const meiliModule = require("meilisearch");
+
+function getMeiliSearchClass(module) {
+  if (!module) throw new Error("Moduł meilisearch jest pusty.");
+  if (typeof module === 'function') return module;
+  if (module.MeiliSearch && typeof module.MeiliSearch === 'function') return module.MeiliSearch;
+  if (module.Meilisearch && typeof module.Meilisearch === 'function') return module.Meilisearch;
+  if (module.default) {
+    if (typeof module.default === 'function') return module.default;
+    if (module.default.MeiliSearch && typeof module.default.MeiliSearch === 'function') return module.default.MeiliSearch;
+    if (module.default.Meilisearch && typeof module.default.Meilisearch === 'function') return module.default.Meilisearch;
+  }
+  const keys = typeof module === 'object' ? Object.keys(module).join(', ') : typeof module;
+  throw new Error("Nie znaleziono konstruktora MeiliSearch. Dostępne klucze modułu: " + keys);
+}
+const MeiliSearch = getMeiliSearchClass(meiliModule);
 require("dotenv").config();
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+const meiliClient = new MeiliSearch({
+  host: process.env.MEILI_HOST || 'http://127.0.0.1:7700',
+  apiKey: process.env.MEILI_MASTER_KEY || 'kapturowo_meili_secret_key_123!',
+});
+
+// Aktualizacja ustawień indeksu (pozwala na literówki w krótkich słowach)
+const setupMeilisearch = async () => {
+  try {
+    const index = meiliClient.index('products');
+    await index.updateTypoTolerance({
+      minWordSizeForTypos: {
+        oneTypo: 3,  // Wystarczą 3 znaki, aby móc zrobić 1 literówkę
+        twoTypos: 7  // Wystarczy 7 znaków, by silnik wybaczył aż 2 błędy
+      }
+    });
+    console.log("Zaktualizowano reguły literówek w Meilisearch.");
+  } catch (err) {
+    console.error('Błąd aktualizacji ustawień Meilisearch:', err);
+  }
+};
+setupMeilisearch();
 
 // Endpoint do obsługi webhooków Stripe
 app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -236,18 +274,10 @@ app.get("/api/products/search", async (req, res) => {
   }
 
   try {
-    const query = `
-      SELECT * FROM products
-      WHERE name LIKE ?
-      ORDER BY id DESC;
-    `;
-    const [rows] = await db.promise().execute(query, [`%${name}%`]);
+    const index = meiliClient.index('products');
+    const searchResults = await index.search(name);
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "Nie znaleziono produktów." });
-    }
-
-    res.status(200).json(rows);
+    res.status(200).json(searchResults.hits);
   } catch (err) {
     console.error("Błąd przy wyszukiwaniu produktów:", err);
     res

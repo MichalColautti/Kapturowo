@@ -41,6 +41,8 @@ services:
       DB_USER: admin
       DB_PASSWORD: password
       DB_NAME: kapturowo_db
+      MEILI_HOST: "http://meilisearch:7700"
+      MEILI_MASTER_KEY: kapturowo_meili_secret_key_123!
     depends_on:
       mysql:
         condition: service_healthy
@@ -112,11 +114,24 @@ services:
     networks:
       - app-network
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.7
+    restart: always
+    environment:
+      - MEILI_MASTER_KEY=kapturowo_meili_secret_key_123!
+      - MEILI_ENV=development
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - app-network
+
 volumes:
   mysql_data:
   umami-db-data:
+  meilisearch_data:
 
 networks:
   app-network:
     driver: bridge
-
