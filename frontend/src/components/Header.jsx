@@ -10,6 +10,12 @@ function Header() {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
+  const trackEvent = (category, action, name) => {
+    if (window._paq) {
+      window._paq.push(['trackEvent', category, action, name]);
+    }
+  };
+
   const handleMouseEnter = () => {
     setIsMegaMenuOpen(true);
   };
@@ -102,13 +108,13 @@ function Header() {
                     <h6 className="fw-bold mb-3">Mężczyzna</h6>
                     <ul className="list-unstyled">
                       <li>
-                        <Link to="/products?category=bluzy&audience=mezczyzna">Bluzy</Link>
+                        <Link to="/products?category=bluzy&audience=mezczyzna" data-umami-event="Kategoria: Bluzy (Mężczyzna)">Bluzy</Link>
                       </li>
                       <li>
-                        <Link to="/products?category=T-shirty&audience=mezczyzna">T-shirty</Link>
+                        <Link to="/products?category=T-shirty&audience=mezczyzna" data-umami-event="Kategoria: T-shirty (Mężczyzna)">T-shirty</Link>
                       </li>
                       <li>
-                        <Link to="/products?category=Buty&audience=mezczyzna">Buty</Link>
+                        <Link to="/products?category=Buty&audience=mezczyzna" data-umami-event="Kategoria: Buty (Mężczyzna)">Buty</Link>
                       </li>
                     </ul>
                   </div>
@@ -116,13 +122,13 @@ function Header() {
                     <h6 className="fw-bold mb-3">Kobieta</h6>
                     <ul className="list-unstyled">
                       <li>
-                        <Link to="/products?category=bluzy&audience=kobieta">Bluzy</Link>
+                        <Link to="/products?category=bluzy&audience=kobieta" data-umami-event="Kategoria: Bluzy (Kobieta)">Bluzy</Link>
                       </li>
                       <li>
-                        <Link to="/products?category=T-shirty&audience=kobieta">T-shirty</Link>
+                        <Link to="/products?category=T-shirty&audience=kobieta" data-umami-event="Kategoria: T-shirty (Kobieta)">T-shirty</Link>
                       </li>
                       <li>
-                        <Link to="/products?category=Buty&audience=kobieta">Buty</Link>
+                        <Link to="/products?category=Buty&audience=kobieta" data-umami-event="Kategoria: Buty (Kobieta)">Buty</Link>
                       </li>
                     </ul>
                   </div>
@@ -130,13 +136,13 @@ function Header() {
                     <h6 className="fw-bold mb-3">Dziecko</h6>
                     <ul className="list-unstyled">
                       <li>
-                        <Link to="/products?category=bluzy&audience=dziecko">Bluzy</Link>
+                        <Link to="/products?category=bluzy&audience=dziecko" data-umami-event="Kategoria: Bluzy (Dziecko)">Bluzy</Link>
                       </li>
                       <li>
-                        <Link to="/products?category=T-shirty&audience=dziecko">T-shirty</Link>
+                        <Link to="/products?category=T-shirty&audience=dziecko" data-umami-event="Kategoria: T-shirty (Dziecko)">T-shirty</Link>
                       </li>
                       <li>
-                        <Link to="/products?category=Buty&audience=dziecko">Buty</Link>
+                        <Link to="/products?category=Buty&audience=dziecko" data-umami-event="Kategoria: Buty (Dziecko)">Buty</Link>
                       </li>
                     </ul>
                   </div>
@@ -144,12 +150,12 @@ function Header() {
               </div>
             </li>
             <li className="nav-item me-3">
-              <Link to="/new-products" className="nav-link">
+              <Link to="/new-products" className="nav-link" data-umami-event="Nawigacja: Nowości">
                 Nowości
               </Link>
             </li>
             <li className="nav-item me-3">
-              <Link to="/sale" className="nav-link">
+              <Link to="/sale" className="nav-link" data-umami-event="Nawigacja: Wyprzedaż">
                 Wyprzedaż
               </Link>
             </li>
@@ -192,7 +198,7 @@ function Header() {
         {/* Kod do icon */}
         <div className="d-flex align-items-center">
           <ProfileMenu />
-          <Link to="/favorites" className="btn btn-link p-2">
+          <Link to="/favorites" className="btn btn-link p-2" data-umami-event="Nawigacja: Ulubione">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -205,7 +211,7 @@ function Header() {
               <path d="M12 21 L3.5 12.5 A5.5 5.5 0 0 1 11.28 4.72 L12 6.2 L12.72 4.72 A5.5 5.5 0 0 1 20.5 12.5 L12 21 Z" />
             </svg>
           </Link>
-          <Link to="/cart" className="btn btn-link p-2">
+          <Link to="/cart" className="btn btn-link p-2" data-umami-event="Nawigacja: Koszyk">
             <svg
               viewBox="0 0 24 24"
               fill="none"
