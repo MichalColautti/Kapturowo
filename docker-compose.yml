@@ -70,6 +70,17 @@ services:
     ports:
       - "3306:3306"
 
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    entrypoint: /bin/sh
+    command: -c "stripe listen --api-key $$STRIPE_SECRET_KEY --forward-to backend:5000/api/webhook --skip-verify"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    env_file:
+      - ./backend/.env
+
 volumes:
   mysql_data:
 
