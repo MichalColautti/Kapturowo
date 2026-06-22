@@ -79,23 +79,23 @@ function ProfileMenu() {
                                         {user !== null ? (
                                             <>
                                                 <MenuItem onClick={handleClose}>
-                                                    <Link to="/profile" className="nav-link">
+                                                    <Link to="/profile" className="nav-link" data-umami-event="Profile: Mój Profil">
                                                         Profil
                                                     </Link>
                                                 </MenuItem>
-                                                <MenuItem onClick={handleLogout}>
+                                                <MenuItem onClick={handleLogout} data-umami-event="Profil: Wylogowanie">
                                                     Wyloguj się
                                                 </MenuItem>
                                             </>
                                         ) : (
                                             <>
                                                 <MenuItem onClick={handleClose}>
-                                                    <Link to="/login" className="nav-link">
+                                                    <Link to="/login" className="nav-link" data-umami-event="Profil: Logowanie">
                                                         Zaloguj się
                                                     </Link>
                                                 </MenuItem>
                                                 <MenuItem onClick={handleClose}>
-                                                    <Link to="/register" className="nav-link">
+                                                    <Link to="/register" className="nav-link" data-umami-event="Profil: Rejestracja">
                                                         Zarejestruj się
                                                     </Link>
                                                 </MenuItem>

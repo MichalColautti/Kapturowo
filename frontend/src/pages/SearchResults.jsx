@@ -29,13 +29,23 @@ function SearchResults() {
   useEffect(() => {
     if (query) {
       fetch(`/api/products/search?name=${encodeURIComponent(query)}`)
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
         .then((data) => {
-          setResults(data);
+          if (Array.isArray(data)) {
+            setResults(data);
+          } else {
+            setResults([]);
+          }
           setLoading(false);
         })
         .catch((err) => {
           console.error("Błąd podczas wyszukiwania:", err);
+          setResults([]);
           setLoading(false);
         });
     }
