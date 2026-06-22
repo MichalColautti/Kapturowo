@@ -63,6 +63,17 @@ function ProductDetails() {
       .catch((err) => console.error("Błąd ładowania rozmiarów:", err));
   }, [id]);
 
+  useEffect(() => {
+    if (product && window.umami) {
+      window.umami.track('Wyświetlenie produktu', {
+        productId: id,
+        productName: product.name,
+        price: product.price,
+        targetAudience: product.target_audience
+      });
+    }
+  }, [product, id]);
+
   const addToCart = async () => {
     if (!userId) {
       alert("Musisz być zalogowany, aby dodać do koszyka.");

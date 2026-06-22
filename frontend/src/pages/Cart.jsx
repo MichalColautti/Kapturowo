@@ -124,6 +124,18 @@ function Cart() {
       return;
     }
 
+    if (window.umami && cartItems.length > 0) {
+      cartItems.forEach(item => {
+        window.umami.track('Zakup produktu', {
+          productId: item.product_id,
+          productName: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          size: item.size
+        });
+      });
+    }
+
     console.log("Sending payment request to backend...");
     fetch("/api/payment/create-checkout-session", {
       method: "POST",

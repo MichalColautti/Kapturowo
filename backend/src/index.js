@@ -68,29 +68,20 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-
+    
+    // Pobieramy TYLKO userId, bo resztę zapisaliśmy w bazie przed płatnością
     const userId = session.metadata.user_id;
-    const orderData = JSON.parse(session.metadata.order_data);
-    const address = JSON.parse(session.metadata.address);
 
     try {
-      const total = orderData.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-      for (const item of orderData) {
-        await db.promise().execute(
-          'INSERT INTO order_items (order_id, product_id, size_id, quantity, price) VALUES (?, ?, ?, ?, ?)',
-          [session.metadata.order_id, item.product_id, item.size_id, item.quantity, item.price]
-        );
-      }
-
+      // Czyścimy koszyk klienta po opłaceniu
       await db.promise().execute(
         'DELETE FROM cart WHERE user_id = ?',
         [userId]
       );
 
-      res.status(200).send('Zamówienie zapisane');
+      res.status(200).send('Koszyk wyczyszczony');
     } catch (err) {
-      console.error('Błąd zapisu zamówienia po płatności:', err);
+      console.error('Błąd czyszczenia koszyka po płatności:', err);
       res.status(500).send();
     }
   } else {
@@ -510,6 +501,13 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
 
     const orderId = orderResult.insertId;
 
+    for (const item of cartItems) {
+      await db.promise().execute(
+        'INSERT INTO order_items (order_id, product_id, size_id, quantity, price) VALUES (?, ?, ?, ?, ?)',
+        [orderId, item.product_id, item.size_id, item.quantity, item.price]
+      );
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
@@ -528,8 +526,6 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
       metadata: {
         order_id: orderId.toString(),
         user_id: userId.toString(),
-        address: JSON.stringify(address),
-        order_data: JSON.stringify(cartItems),
       }
     });
 
