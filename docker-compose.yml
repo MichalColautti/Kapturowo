@@ -46,6 +46,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      minio:
+        condition: service_started
     networks:
       - app-network
     env_file:
@@ -127,10 +129,49 @@ services:
     networks:
       - app-network
 
+  mailpit:
+    image: axllent/mailpit
+    container_name: kapturowo-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - app-network
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: kapturowo-uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - uptime-kuma-data:/app/data
+    networks:
+      - app-network
+
+  minio:
+    image: quay.io/minio/minio
+    container_name: kapturowo-minio
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: kapturowadmin
+      MINIO_ROOT_PASSWORD: kapturowasecret
+    volumes:
+      - minio-data:/data
+    networks:
+      - app-network
+
 volumes:
   mysql_data:
   umami-db-data:
   meilisearch_data:
+  uptime-kuma-data:
+  minio-data:
 
 networks:
   app-network:

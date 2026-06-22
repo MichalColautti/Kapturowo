@@ -3,7 +3,6 @@ const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const multer = require("multer");
-const fs = require("fs");
 const path = require("path");
 const app = express();
 const bcrypt = require("bcrypt");
@@ -24,6 +23,8 @@ function getMeiliSearchClass(module) {
   throw new Error("Nie znaleziono konstruktora MeiliSearch. Dostępne klucze modułu: " + keys);
 }
 const MeiliSearch = getMeiliSearchClass(meiliModule);
+const { sendOrderConfirmationEmail } = require("./services/emailService");
+const { initializeMinIO, uploadProductImage } = require("./services/minioService");
 require("dotenv").config();
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -50,6 +51,18 @@ const setupMeilisearch = async () => {
 };
 setupMeilisearch();
 
+const productImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Dozwolone są wyłącznie pliki graficzne."));
+    }
+  },
+});
+
 // Endpoint do obsługi webhooków Stripe
 app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
@@ -68,20 +81,37 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    
-    // Pobieramy TYLKO userId, bo resztę zapisaliśmy w bazie przed płatnością
+
     const userId = session.metadata.user_id;
+    const orderId = session.metadata.order_id;
 
     try {
-      // Czyścimy koszyk klienta po opłaceniu
       await db.promise().execute(
         'DELETE FROM cart WHERE user_id = ?',
         [userId]
       );
 
+      const [users] = await db.promise().execute(
+        'SELECT email FROM users WHERE id = ?',
+        [userId]
+      );
+      const [orders] = await db.promise().execute(
+        'SELECT total_price FROM orders WHERE id = ?',
+        [orderId]
+      );
+
+      if (users.length > 0 && orders.length > 0) {
+        await sendOrderConfirmationEmail({
+          to: users[0].email,
+          orderId,
+          totalPrice: orders[0].total_price,
+        });
+        console.log(`Wysłano potwierdzenie zamówienia #${orderId} na ${users[0].email}`);
+      }
+
       res.status(200).send('Koszyk wyczyszczony');
     } catch (err) {
-      console.error('Błąd czyszczenia koszyka po płatności:', err);
+      console.error('Błąd obsługi płatności (koszyk / e-mail):', err);
       res.status(500).send();
     }
   } else {
@@ -109,6 +139,23 @@ const db = mysql.createConnection({
   password: process.env.DB_PASSWORD || "password",
   database: process.env.DB_NAME || "kapturowo_db",
   charset: "utf8mb4",
+});
+
+app.get("/api/health", async (req, res) => {
+  try {
+    await db.promise().execute("SELECT 1");
+    res.status(200).json({
+      status: "UP",
+      database: "CONNECTED",
+      timestamp: new Date(),
+    });
+  } catch (err) {
+    console.error("Health check failed:", err);
+    res.status(503).json({
+      status: "DOWN",
+      error: "Database unavailable",
+    });
+  }
 });
 
 // Endpoint do rejestracji
@@ -361,6 +408,54 @@ app.get("/api/get-favorites/:userId", async (req, res) => {
   }
 });
 
+// Endpoint do dodawania produktu ze zdjęciem (MinIO)
+app.post(
+  "/api/products",
+  productImageUpload.single("image"),
+  async (req, res) => {
+    const { name, price, description, target_audience, category_id } = req.body;
+
+    if (!name || !price || !target_audience || !category_id) {
+      return res.status(400).json({ message: "Brak wymaganych danych produktu." });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "Plik zdjęcia jest wymagany." });
+    }
+
+    const validAudiences = ["mezczyzna", "kobieta", "dziecko"];
+    if (!validAudiences.includes(target_audience)) {
+      return res.status(400).json({ message: "Nieprawidłowa grupa docelowa." });
+    }
+
+    try {
+      const imageUrl = await uploadProductImage(req.file);
+
+      const [result] = await db.promise().execute(
+        `INSERT INTO products (name, price, description, imageUrl, target_audience, category_id)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          name,
+          parseFloat(price),
+          description || null,
+          imageUrl,
+          target_audience,
+          parseInt(category_id, 10),
+        ]
+      );
+
+      res.status(201).json({
+        message: "Produkt dodany pomyślnie.",
+        id: result.insertId,
+        imageUrl,
+      });
+    } catch (err) {
+      console.error("Błąd dodawania produktu:", err);
+      res.status(500).json({ message: "Błąd serwera przy dodawaniu produktu." });
+    }
+  }
+);
+
 // Endpoint do pobierania produktu po id
 app.get("/api/products/:id", async (req, res) => {
   const { id } = req.params;
@@ -611,6 +706,27 @@ app.get('/api/orders/:userId', async (req, res) => {
   }
 });
 
-app.listen(5000, "0.0.0.0", () => {
-  console.log("Serwer backend działa na porcie 5000");
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ message: `Błąd przesyłania pliku: ${err.message}` });
+  }
+  if (err) {
+    return res.status(400).json({ message: err.message });
+  }
+  next();
 });
+
+async function startServer() {
+  try {
+    await initializeMinIO();
+  } catch (err) {
+    console.error("Błąd inicjalizacji MinIO:", err);
+    process.exit(1);
+  }
+
+  app.listen(5000, "0.0.0.0", () => {
+    console.log("Serwer backend działa na porcie 5000");
+  });
+}
+
+startServer();
