@@ -1,5 +1,8 @@
 import React from "react";
 
+const MINIO_PRODUCTS_URL =
+  import.meta.env.VITE_MINIO_PUBLIC_URL || "http://localhost:9000/products";
+
 function Image_slider() {
   const aspectRatio = "5/2"; // Ustaw żądane proporcje
 
@@ -18,7 +21,7 @@ function Image_slider() {
         <div className="carousel-inner w-full h-full">
           <div className="carousel-item active w-full h-full absolute inset-0">
             <img
-              src="/image_slider/img_1.jpg"
+              src={`${MINIO_PRODUCTS_URL}/img_1.jpg`}
               className="w-full h-full object-cover"
               alt="Slider 1"
               width="100%"
@@ -26,7 +29,7 @@ function Image_slider() {
           </div>
           <div className="carousel-item w-full h-full absolute inset-0">
             <img
-              src="/image_slider/img_2.jpg"
+              src={`${MINIO_PRODUCTS_URL}/img_2.jpg`}
               className="w-full h-full object-cover"
               alt="Slider 2"
               width="100%"
@@ -34,7 +37,7 @@ function Image_slider() {
           </div>
           <div className="carousel-item w-full h-full absolute inset-0">
             <img
-              src="/image_slider/img_3.jpg"
+              src={`${MINIO_PRODUCTS_URL}/img_3.jpg`}
               className="w-full h-full object-cover"
               alt="Slider 3"
               width="100%"

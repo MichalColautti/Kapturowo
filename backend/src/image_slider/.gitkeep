@@ -1,0 +1,2 @@
+Umieść tutaj pliki graficzne produktów (np. img_1.jpg, img_2.jpg, img_3.jpg, img_4.jpg).
+Przy starcie backendu zostaną automatycznie przesłane do MinIO (bucket: products).

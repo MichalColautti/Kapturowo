@@ -100,33 +100,33 @@ INSERT INTO sizes (size) VALUES ('S'), ('M'), ('L'), ('XL'), ('35'), ('36'), ('3
 
 INSERT INTO products (name, price, imageUrl, target_audience, category_id) VALUES
 -- Bluzy
-('Bluza z kapturem', 120.00, '/image_slider/img_1.jpg', 'mezczyzna', 1),
-('Bluza sportowa', 150.00, '/image_slider/img_1.jpg', 'mezczyzna', 1),
-('Bluza z nadrukiem', 130.00, '/image_slider/img_3.jpg', 'kobieta', 1),
-('Bluza oversize', 140.00, '/image_slider/img_2.jpg', 'mezczyzna', 1),
-('Bluza dziecięca z kapturem', 60.00, '/image_slider/img_1.jpg', 'dziecko', 1),
+('Bluza z kapturem', 120.00, 'http://localhost:9000/products/img_1.jpg', 'mezczyzna', 1),
+('Bluza sportowa', 150.00, 'http://localhost:9000/products/img_1.jpg', 'mezczyzna', 1),
+('Bluza z nadrukiem', 130.00, 'http://localhost:9000/products/img_3.jpg', 'kobieta', 1),
+('Bluza oversize', 140.00, 'http://localhost:9000/products/img_2.jpg', 'mezczyzna', 1),
+('Bluza dziecięca z kapturem', 60.00, 'http://localhost:9000/products/img_1.jpg', 'dziecko', 1),
 -- T-shirty
-('T-shirt sportowy', 85.00, '/image_slider/img_1.jpg', 'mezczyzna', 2),
-('T-shirt ekologiczny', 95.00, '/image_slider/img_3.jpg', 'kobieta', 2),
-('T-shirt bawelniany', 80.00, '/image_slider/img_2.jpg', 'mezczyzna', 2),
-('T-shirt z nadrukiem', 90.00, '/image_slider/img_3.jpg', 'kobieta', 2),
-('T-shirt dla dziecka', 50.00, '/image_slider/img_3.jpg', 'dziecko', 2),
+('T-shirt sportowy', 85.00, 'http://localhost:9000/products/img_1.jpg', 'mezczyzna', 2),
+('T-shirt ekologiczny', 95.00, 'http://localhost:9000/products/img_3.jpg', 'kobieta', 2),
+('T-shirt bawelniany', 80.00, 'http://localhost:9000/products/img_2.jpg', 'mezczyzna', 2),
+('T-shirt z nadrukiem', 90.00, 'http://localhost:9000/products/img_3.jpg', 'kobieta', 2),
+('T-shirt dla dziecka', 50.00, 'http://localhost:9000/products/img_3.jpg', 'dziecko', 2),
 -- Buty
-('Sneakersy', 300.00, '/image_slider/img_4.jpg', 'kobieta', 3),
-('Sandały', 200.00, '/image_slider/img_4.jpg', 'kobieta', 3),
-('Buty do biegania', 350.00, '/image_slider/img_4.jpg', 'mezczyzna', 3),
-('Buty zimowe dla dzieci', 120.00, '/image_slider/img_4.jpg', 'dziecko', 3),
-('Sneakersy Classic', 300.00, '/image_slider/img_4.jpg', 'kobieta', 3),
-('Buty trekkingowe', 450.00, '/image_slider/img_4.jpg', 'kobieta', 3),
-('Buty do biegania', 350.00, '/image_slider/img_4.jpg', 'mezczyzna', 3),
-('Sandały letnie', 200.00, '/image_slider/img_4.jpg', 'kobieta', 3),
-('Buty zimowe', 400.00, '/image_slider/img_4.jpg', 'mezczyzna', 3),
-('Buty dziecięce sportowe', 120.00, '/image_slider/img_4.jpg', 'dziecko', 3),
-('Buty na co dzień', 250.00, '/image_slider/img_4.jpg', 'mezczyzna', 3),
-('Buty eleganckie', 320.00, '/image_slider/img_4.jpg', 'kobieta', 3),
-('Buty trekkingowe damskie', 460.00, '/image_slider/img_4.jpg', 'kobieta', 3),
-('Buty sportowe dla dzieci', 130.00, '/image_slider/img_4.jpg', 'dziecko', 3),
-('Buty sportowe dla dorosłych', 2.00, '/image_slider/img_4.jpg', 'dziecko', 3)
+('Sneakersy', 300.00, 'http://localhost:9000/products/img_4.jpg', 'kobieta', 3),
+('Sandały', 200.00, 'http://localhost:9000/products/img_4.jpg', 'kobieta', 3),
+('Buty do biegania', 350.00, 'http://localhost:9000/products/img_4.jpg', 'mezczyzna', 3),
+('Buty zimowe dla dzieci', 120.00, 'http://localhost:9000/products/img_4.jpg', 'dziecko', 3),
+('Sneakersy Classic', 300.00, 'http://localhost:9000/products/img_4.jpg', 'kobieta', 3),
+('Buty trekkingowe', 450.00, 'http://localhost:9000/products/img_4.jpg', 'kobieta', 3),
+('Buty do biegania', 350.00, 'http://localhost:9000/products/img_4.jpg', 'mezczyzna', 3),
+('Sandały letnie', 200.00, 'http://localhost:9000/products/img_4.jpg', 'kobieta', 3),
+('Buty zimowe', 400.00, 'http://localhost:9000/products/img_4.jpg', 'mezczyzna', 3),
+('Buty dziecięce sportowe', 120.00, 'http://localhost:9000/products/img_4.jpg', 'dziecko', 3),
+('Buty na co dzień', 250.00, 'http://localhost:9000/products/img_4.jpg', 'mezczyzna', 3),
+('Buty eleganckie', 320.00, 'http://localhost:9000/products/img_4.jpg', 'kobieta', 3),
+('Buty trekkingowe damskie', 460.00, 'http://localhost:9000/products/img_4.jpg', 'kobieta', 3),
+('Buty sportowe dla dzieci', 130.00, 'http://localhost:9000/products/img_4.jpg', 'dziecko', 3),
+('Buty sportowe dla dorosłych', 2.00, 'http://localhost:9000/products/img_4.jpg', 'dziecko', 3)
 ;
 
 UPDATE products SET description = 'Klasyczna bluza z kapturem, idealna na każdą okazję. Wykonana z wysokiej jakości bawełny.' WHERE id = 1;

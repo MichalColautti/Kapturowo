@@ -3,7 +3,6 @@ const express = require("express");
 const mysql = require("mysql2");
 const cors = require("cors");
 const multer = require("multer");
-const path = require("path");
 const app = express();
 const bcrypt = require("bcrypt");
 const Stripe = require("stripe");
@@ -24,7 +23,7 @@ function getMeiliSearchClass(module) {
 }
 const MeiliSearch = getMeiliSearchClass(meiliModule);
 const { sendOrderConfirmationEmail } = require("./services/emailService");
-const { initializeMinIO, uploadProductImage } = require("./services/minioService");
+const { initializeMinIO, uploadProductImage, migrateLocalImagesToMinIO } = require("./services/minioService");
 require("dotenv").config();
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -121,12 +120,6 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 
 app.use(express.json());
 app.use(cors());
-
-app.use(
-  "/product_images",
-  express.static(path.join(__dirname, "product_images"))
-);
-app.use("/image_slider", express.static(path.join(__dirname, "image_slider")));
 
 app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -719,8 +712,9 @@ app.use((err, req, res, next) => {
 async function startServer() {
   try {
     await initializeMinIO();
+    await migrateLocalImagesToMinIO(db);
   } catch (err) {
-    console.error("Błąd inicjalizacji MinIO:", err);
+    console.error("Błąd inicjalizacji MinIO / migracji zdjęć:", err);
     process.exit(1);
   }
 
