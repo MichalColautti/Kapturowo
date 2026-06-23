@@ -99,22 +99,30 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
         [orderId]
       );
 
+      const [orderItems] = await db.promise().execute(
+        `SELECT oi.quantity, oi.price, p.name, s.size
+         FROM order_items oi
+         JOIN products p ON oi.product_id = p.id
+         JOIN sizes s ON oi.size_id = s.id
+         WHERE oi.order_id = ?`,
+        [orderId]
+      );
+
       if (users.length > 0 && orders.length > 0) {
         await sendOrderConfirmationEmail({
           to: users[0].email,
           orderId,
           totalPrice: orders[0].total_price,
+          items: orderItems, 
         });
         console.log(`Wysłano potwierdzenie zamówienia #${orderId} na ${users[0].email}`);
       }
 
-      res.status(200).send('Koszyk wyczyszczony');
+      res.status(200).send('Koszyk wyczyszczony i mail wysłany');
     } catch (err) {
       console.error('Błąd obsługi płatności (koszyk / e-mail):', err);
       res.status(500).send();
     }
-  } else {
-    res.status(200).send();
   }
 });
 

@@ -5,8 +5,20 @@ function formatPrice(amount) {
   }).format(amount);
 }
 
-function buildOrderConfirmationHtml({ orderId, totalPrice }) {
+function buildOrderConfirmationHtml({ orderId, totalPrice, items = [] }) {
   const formattedTotal = formatPrice(totalPrice);
+
+  const itemsHtml = items.map(item => `
+    <tr>
+      <td style="padding: 6px 0; color: #4b5563; font-size: 14px;">
+        <strong>${item.name}</strong> <br/>
+        <span style="color: #6b7280; font-size: 12px;">Rozmiar: ${item.size} | Ilość: ${item.quantity}</span>
+      </td>
+      <td style="padding: 6px 0; color: #1a1a2e; font-size: 14px; font-weight: 600; text-align: right; vertical-align: top;">
+        ${formatPrice(item.price * item.quantity)}
+      </td>
+    </tr>
+  `).join('');
 
   return `<!DOCTYPE html>
 <html lang="pl">
@@ -29,18 +41,28 @@ function buildOrderConfirmationHtml({ orderId, totalPrice }) {
             <td style="padding:32px;">
               <h2 style="margin:0 0 16px;color:#1a1a2e;font-size:20px;">Dziękujemy za zakupy!</h2>
               <p style="margin:0 0 24px;color:#4b5563;font-size:15px;line-height:1.6;">
-                Twoje zamówienie zostało przyjęte i jest w trakcie realizacji. Poniżej znajdziesz podsumowanie.
+                Twoje zamówienie zostało przyjęte i jest w trakcie realizacji. Poniżej znajdziesz podsumowanie zakupów.
               </p>
+              
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;border-radius:6px;padding:20px;">
                 <tr>
-                  <td style="padding:8px 0;color:#6b7280;font-size:14px;">Numer zamówienia</td>
-                  <td style="padding:8px 0;color:#1a1a2e;font-size:14px;font-weight:600;text-align:right;">#${orderId}</td>
+                  <td colspan="2" style="padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; color: #1a1a2e; font-size: 14px; font-weight: bold;">
+                    Zakupione produkty:
+                  </td>
+                </tr>
+                
+                ${itemsHtml}
+                
+                <tr>
+                  <td style="padding:16px 0 8px;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;">Numer zamówienia</td>
+                  <td style="padding:16px 0 8px;color:#1a1a2e;font-size:14px;font-weight:600;text-align:right;border-top:1px solid #e5e7eb;">#${orderId}</td>
                 </tr>
                 <tr>
-                  <td style="padding:8px 0;color:#6b7280;font-size:14px;">Łączna kwota</td>
-                  <td style="padding:8px 0;color:#1a1a2e;font-size:14px;font-weight:600;text-align:right;">${formattedTotal}</td>
+                  <td style="padding:8px 0 0;color:#6b7280;font-size:14px;">Łączna kwota</td>
+                  <td style="padding:8px 0 0;color:#1a1a2e;font-size:14px;font-weight:600;text-align:right;">${formattedTotal}</td>
                 </tr>
               </table>
+              
               <p style="margin:24px 0 0;color:#4b5563;font-size:14px;line-height:1.6;">
                 W razie pytań skontaktuj się z nami. Do zobaczenia w Kapturowo!
               </p>
