@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 
@@ -10,7 +10,7 @@ function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const { user } = useAuth();
   const userId = user?.id;
-
+  const umamiTracked = useRef(false);
   const sizeMap = {
     S: 1,
     M: 2,
@@ -64,13 +64,15 @@ function ProductDetails() {
   }, [id]);
 
   useEffect(() => {
-    if (product && window.umami) {
+    // Sprawdź, czy produkt jest załadowany, Umami istnieje i czy zdarzenie nie zostało jeszcze wysłane
+    if (product && window.umami && !umamiTracked.current) {
       window.umami.track('Wyświetlenie produktu', {
         productId: id,
         productName: product.name,
         price: product.price,
         targetAudience: product.target_audience
       });
+      umamiTracked.current = true; // Oznacz, że zdarzenie zostało wysłane
     }
   }, [product, id]);
 
